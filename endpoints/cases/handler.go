@@ -23,15 +23,19 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 		}
 		country = funcs.DesensitizeString(country)
 
-		getGraphql, err := funcs.GetGraphql("https://covid19-graphql.vercel.app/", formatRequest(country))
-		funcs.HandleErr(err, w, http.StatusBadRequest)
+		getGraphql, err := funcs.GetGraphql(consts.CASES_API, formatRequest(country))
+		if funcs.HandleErr(err, w, http.StatusBadRequest) {
+			return
+		}
 
 		// wrap response
 		formattedResponse := wrapData(getGraphql)
 
 		// send to writer
 		err = json.NewEncoder(w).Encode(formattedResponse)
-		funcs.HandleErr(err, w, http.StatusInternalServerError)
+		if funcs.HandleErr(err, w, http.StatusInternalServerError) {
+			return
+		}
 
 	} else {
 		http.Error(w, "Method not allowed, use GET", http.StatusMethodNotAllowed)

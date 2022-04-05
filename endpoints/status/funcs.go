@@ -8,23 +8,11 @@ import (
 	"net/http"
 )
 
-func formatRequest() string {
-	return `
-	query {
-		country(name: "Norway") {
-        mostRecent{
-            date
-        }
-      }
-    }
-	`
-}
-
 func checkAPIServices() map[string]string {
 	returnAPIs := map[string]string{}
 	compare := map[string]string{
 		"cases_api":  consts.CASES_API,
-		"policy_api": consts.POLICY_API + "NOR/2022-04-04",
+		"policy_api": consts.POLICY_API + consts.POLICY_TEST,
 	}
 	for api, url := range compare {
 		response, _, _ := funcs.GetURL(url)

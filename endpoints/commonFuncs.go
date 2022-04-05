@@ -11,13 +11,6 @@ import (
 	"github.com/machinebox/graphql"
 )
 
-func DesensitizeString(inn string) string {
-	inn = strings.ToLower(inn)
-	r := []rune(inn)
-	r[0] = unicode.ToUpper(r[0])
-	return string(r)
-}
-
 func SplitURL(path string, w http.ResponseWriter, r *http.Request) []string {
 
 	// Handles the Url by splitting its value strating after the CASES_PATH
@@ -28,6 +21,13 @@ func SplitURL(path string, w http.ResponseWriter, r *http.Request) []string {
 		return nil
 	}
 	return urlSplit
+}
+
+func DesensitizeString(inn string) string {
+	inn = strings.ToLower(inn)
+	r := []rune(inn)
+	r[0] = unicode.ToUpper(r[0])
+	return string(r)
 }
 
 /**	checkError logs an error.
@@ -52,11 +52,12 @@ func GetURL(inn string) (*http.Response, bool, error) {
 /**	HandleErr logs an error.
  *	@param inn - error value
  */
-func HandleErr(inn error, w http.ResponseWriter, code int) {
-	if inn != nil {
-		http.Error(w, inn.Error(), code)
-		return
+func HandleErr(err error, w http.ResponseWriter, code int) bool {
+	if err != nil {
+		http.Error(w, err.Error(), code)
+		return true
 	}
+	return false
 }
 
 func HandleURL(inn string) []string {
@@ -82,12 +83,12 @@ func HttpRequest(url string) (map[string]interface{}, error) {
 	}
 
 	// Attempt to decode
-	var v map[string]interface{}
-	err = json.NewDecoder(resp.Body).Decode(&v)
+	var returnVal map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&returnVal)
 	if err != nil {
 		return map[string]interface{}{}, err
 	}
 
 	// Return
-	return v, err
+	return returnVal, err
 }

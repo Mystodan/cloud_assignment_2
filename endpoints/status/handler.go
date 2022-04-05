@@ -21,7 +21,9 @@ func HandlerStatus(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		if urlSplit[0] == "" {
 			err := json.NewEncoder(w).Encode(getAPIstatus())
-			funcs.HandleErr(err, w, http.StatusInternalServerError)
+			if funcs.HandleErr(err, w, http.StatusInternalServerError) {
+				return
+			}
 		}
 	} else {
 		http.Error(w, "Method not allowed, use GET", http.StatusMethodNotAllowed)
