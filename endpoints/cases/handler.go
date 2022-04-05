@@ -5,7 +5,6 @@ import (
 	funcs "assignment-2/endpoints"
 	"encoding/json"
 	"net/http"
-	"unicode"
 )
 
 /**
@@ -14,13 +13,7 @@ import (
 func HandlerCases(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	// Handles the Url by splitting its value strating after the CASES_PATH
-	urlSplit := funcs.HandleURL(r.URL.EscapedPath()[len(consts.CASES_PATH):])
-
-	// Check if the user input enough args
-	if len(urlSplit) < 1 {
-		http.Error(w, "Not enough arguments, see documentation", http.StatusBadRequest)
-		return
-	}
+	urlSplit := funcs.SplitURL(consts.CASES_PATH, w, r)
 
 	if r.Method == http.MethodGet {
 		country := urlSplit[0]
@@ -28,11 +21,9 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "No country name inputted", http.StatusBadRequest)
 			return
 		}
-		r := []rune(country)
-		r[0] = unicode.ToUpper(r[0])
-		country = string(r)
+		country = funcs.DesensitizeString(country)
 
-		getGraphql, err := funcs.GetGraphql("https://covid19-graphql.vercel.app/", reqBody(country))
+		getGraphql, err := funcs.GetGraphql("https://covid19-graphql.vercel.app/", formatRequest(country))
 		funcs.HandleErr(err, w, http.StatusBadRequest)
 
 		// wrap response

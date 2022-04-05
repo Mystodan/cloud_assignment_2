@@ -1,8 +1,10 @@
 package cases
 
-import "fmt"
+import (
+	"fmt"
+)
 
-func reqBody(inn string) string {
+func formatRequest(inn string) string {
 	return fmt.Sprintf(`
 	query {
 		country(name: "%s") {

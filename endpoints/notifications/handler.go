@@ -5,7 +5,7 @@ import (
 )
 
 /**
- *	Handler for 'cases' endpoint
+ *	Handler for 'notifications' endpoint
  */
 func HandlerNotifications(w http.ResponseWriter, r *http.Request) {
 

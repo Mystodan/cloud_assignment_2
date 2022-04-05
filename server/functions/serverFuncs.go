@@ -1,4 +1,4 @@
-package funcs
+package server
 
 import (
 	consts "assignment-2/constants"
