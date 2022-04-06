@@ -3,6 +3,7 @@ package policy
 import (
 	consts "assignment-2/constants"
 	"fmt"
+	"strconv"
 )
 
 func dataExists(list map[string]interface{}, data string) bool {
@@ -31,27 +32,32 @@ func wrapData(data map[string]interface{}) Policy {
 	policies := getValidData(data, "policyActions", "policy_type_code")
 	// Get 'stringencyData'
 	data = data["stringencyData"].(map[string]interface{})
-
-	// If there's no data, return an empty struct
+	// If there's no data, return a struct with value unavailable
 	inn := "msg"
 	if dataExists(data, inn) && data[inn].(string) == "Data unavailable" {
-		return Policy{}
+		return Policy{
+			consts.APP_VALUE_UNAVAILABLE,
+			consts.APP_VALUE_UNAVAILABLE,
+			consts.APP_VALUE_UNAVAILABLE,
+			consts.APP_VALUE_UNAVAILABLE,
+		}
 	}
 	// Setter for stringency
 	var actual float64
 	actual = data["stringency"].(float64)
-
 	// Check if stringency_acual exists
 	inn = "stringency_actual"
 	if dataExists(data, inn) {
 		actual = data[inn].(float64)
 	}
-
+	// convert rest data to string
+	stringency := fmt.Sprintf("%f", actual)
+	policiesAmount := strconv.Itoa((len(policies)))
 	// Otherwise, fill it with the data form
 	return Policy{
 		data["country_code"].(string),
 		data["date_value"].(string),
-		actual,
-		len(policies),
+		stringency,
+		policiesAmount,
 	}
 }

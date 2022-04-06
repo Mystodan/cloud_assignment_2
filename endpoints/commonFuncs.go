@@ -75,8 +75,7 @@ func GetGraphql(url string, body string) (map[string]interface{}, error) {
 	return returnVal, err
 }
 
-func HttpRequest(url string) (map[string]interface{}, error) {
-	// Send request to covidtracker API
+func RequestURL(url string) (map[string]interface{}, error) {
 	resp, state, err := GetURL(url)
 	if state {
 		return map[string]interface{}{}, err

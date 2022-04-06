@@ -44,7 +44,7 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Send request to api
-		getRequest, err := funcs.HttpRequest(formatRequest(country, optParam))
+		getRequest, err := funcs.RequestURL(formatRequest(country, optParam))
 		if err != nil {
 			http.Error(w, "Error sending request to covidtracker API", http.StatusFailedDependency)
 			return

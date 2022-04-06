@@ -3,6 +3,7 @@ package main
 import (
 	//constants
 	consts "assignment-2/constants"
+	glob "assignment-2/globals"
 	"time"
 
 	// endpoints
@@ -15,14 +16,8 @@ import (
 	server "assignment-2/server/functions"
 	"context"
 	"net/http"
-
 	// Firebase Dependancies
-	"cloud.google.com/go/firestore"
 )
-
-// Firebase context and client used by Firestore functions throughout the program.
-var ctx context.Context
-var client *firestore.Client
 
 /**
  *	The main function.
@@ -33,16 +28,19 @@ func main() {
 
 	port := server.SetPort(consts.DEFAULT_PORT)
 	// Firebase initialisation
-	ctx = context.Background()
+	glob.Ctx = context.Background()
 
 	// We use a service account, load credentials file that you downloaded from your project's settings menu.
-	app := server.SetServiceAcc(ctx, "serviceKey/serviceAccountKey.json")
+	app := server.SetServiceAcc(glob.Ctx, "serviceKey/serviceAccountKey.json")
 
 	// Instantiate client
-	client = server.InstantiateFBClient(app, ctx)
+	glob.Client = server.InstantiateFBClient(app, glob.Ctx)
+
+	// Load all webhooks
+	notifications.SetAllTokens(notifications.LoadWebhooksFromFB())
 
 	// Close down client
-	defer server.CloseFB(client)
+	defer server.CloseFB(glob.Client)
 
 	// Routing endpoints
 	http.HandleFunc(consts.CASES_PATH, cases.HandlerCases)

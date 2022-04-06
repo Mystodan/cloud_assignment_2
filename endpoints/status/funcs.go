@@ -3,6 +3,7 @@ package status
 import (
 	consts "assignment-2/constants"
 	funcs "assignment-2/endpoints"
+	"assignment-2/endpoints/notifications"
 	server "assignment-2/server/functions"
 	"fmt"
 	"net/http"
@@ -25,12 +26,16 @@ func checkAPIServices() map[string]string {
 	return returnAPIs
 }
 
+func getWebHooksAmount(inn map[string]notifications.Webhook) string {
+	return fmt.Sprintf("%d registered webhooks", len(inn))
+}
+
 func getAPIstatus() statusInterface {
 	APIstatuses := checkAPIServices()
 	return statusInterface{
 		APIstatuses["cases_api"],
 		APIstatuses["policy_api"],
-		"to be implemented:!!",
+		getWebHooksAmount(notifications.GetAllWebhooks()),
 		consts.APP_VERSION,
 		fmt.Sprintf("%f", server.GetUptime(Timer).Seconds()) + "s",
 	}
