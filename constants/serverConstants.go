@@ -20,6 +20,9 @@ const POLICY_PATH = "/corona/" + APP_VERSION + "/policy/"
 const STATUS_PATH = "/corona/" + APP_VERSION + "/status/"
 const NOTIFICATIONS_PATH = "/corona/" + APP_VERSION + "/notifications/"
 
+// stub path
+const STUBBING = "/corona/" + APP_VERSION + "/stubbing/"
+
 // Cache timer
 const DAYS = 24
 const CACHE_TIMER = 2 * DAYS

@@ -1,0 +1,47 @@
+{ "policy_stub":[
+      {
+        "country_code": "FRA",
+        "scope": "2022-04-04",
+        "stringency": "19.440000",
+        "policies": "0"
+      },
+      {
+        "country_code": "NOR",
+        "scope": "2022-04-04",
+        "stringency": "11.110000",
+        "policies": "21"
+      },
+      {
+        "country_code": "JPN",
+        "scope": "2022-04-04",
+        "stringency": "43.520000",
+        "policies": "17"
+    }
+  ],
+ "cases_stub":[
+    {
+      "country": "Norway",
+      "date": "2022-04-06",
+      "confirmed": 1412969,
+      "recovered": 0,
+      "deaths": 2667,
+      "growth_rate": 0.001005277886011831
+    },
+    {
+      "country": "France",
+      "date": "2022-04-06",
+      "confirmed": 26579448,
+      "recovered": 0,
+      "deaths": 143949,
+      "growth_rate": 0.0057124746807193875
+    },
+    {
+      "country": "Japan",
+      "date": "2022-04-06",
+      "confirmed": 6830997,
+      "recovered": 0,
+      "deaths": 28462,
+      "growth_rate": 0.008081330107156835
+    }
+  ]
+}

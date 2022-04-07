@@ -13,6 +13,7 @@ import (
 	notifications "assignment-2/endpoints/notifications"
 	policy "assignment-2/endpoints/policy"
 	status "assignment-2/endpoints/status"
+	stub "assignment-2/endpoints/testing"
 
 	// server
 
@@ -51,6 +52,7 @@ func main() {
 	http.HandleFunc(consts.POLICY_PATH, policy.HandlerPolicy)
 	http.HandleFunc(consts.STATUS_PATH, status.HandlerStatus)
 	http.HandleFunc(consts.NOTIFICATIONS_PATH, notifications.HandlerNotifications)
+	http.HandleFunc(consts.STUBBING, stub.HandlerStub)
 
 	// listen for port
 	server.SetListener(port)
