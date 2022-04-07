@@ -3,7 +3,9 @@ package main
 import (
 	//constants
 	consts "assignment-2/constants"
-	glob "assignment-2/globals"
+	funcs "assignment-2/endpoints"
+	glob "assignment-2/global_types"
+	"math/rand"
 	"time"
 
 	// endpoints
@@ -24,21 +26,23 @@ import (
  *	Creates a link/routes to the correct handlers
  */
 func main() {
+	rand.Seed(time.Now().UTC().UnixNano())
 	status.Timer = time.Now()
-
-	port := server.SetPort(consts.DEFAULT_PORT)
+	// sets port to defalt
+	port := server.SetPort(consts.CURRENT_PORT)
 	// Firebase initialisation
 	glob.Ctx = context.Background()
 
 	// We use a service account, load credentials file that you downloaded from your project's settings menu.
-	app := server.SetServiceAcc(glob.Ctx, "serviceKey/serviceAccountKey.json")
+	app := server.SetServiceAcc(glob.Ctx, consts.SERVICEKEY_PATH)
 
 	// Instantiate client
 	glob.Client = server.InstantiateFBClient(app, glob.Ctx)
 
 	// Load all webhooks
-	notifications.SetAllTokens(notifications.LoadWebhooksFromFB())
-
+	glob.AllWebhooks = notifications.LoadWebhooksFromFB()
+	// Load all countries and alpha codes
+	glob.AllCountries = funcs.LoadCountries()
 	// Close down client
 	defer server.CloseFB(glob.Client)
 

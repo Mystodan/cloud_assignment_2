@@ -1,8 +1,11 @@
 package funcs
 
 import (
+	consts "assignment-2/constants"
+	glob "assignment-2/global_types"
 	"context"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -10,6 +13,21 @@ import (
 
 	"github.com/machinebox/graphql"
 )
+
+func POLICY_AVAILABLE(CountryCode string, Scope string, Stringency string, Policies string) glob.Policy {
+	return glob.Policy{CountryCode, Scope, Stringency, Policies}
+}
+func CASE_AVAILABLE(Country string, Date string, Confirmed float64, Recovered float64, Deaths float64, Growth_rate float64) glob.Case {
+	return glob.Case{Country, Date, Confirmed, Recovered, Deaths, Growth_rate}
+}
+func POLICY_UNAVAILABLE() glob.Policy {
+	return POLICY_AVAILABLE(
+		consts.APP_VALUE_UNAVAILABLE,
+		consts.APP_VALUE_UNAVAILABLE,
+		consts.APP_VALUE_UNAVAILABLE,
+		consts.APP_VALUE_UNAVAILABLE,
+	)
+}
 
 func SplitURL(path string, w http.ResponseWriter, r *http.Request) []string {
 
@@ -21,6 +39,43 @@ func SplitURL(path string, w http.ResponseWriter, r *http.Request) []string {
 		return nil
 	}
 	return urlSplit
+}
+
+func LoadCountries() []glob.Countries {
+	//return values
+	var getAllCountries map[string]interface{}
+	var setAllCountries []glob.Countries
+	// load from file
+	readCountries, _ := ioutil.ReadFile(consts.ALPHA3_PATH)
+	// read data as map[string]interface{}
+	json.Unmarshal(readCountries, &getAllCountries)
+	getCountries := getAllCountries["countries"].([]interface{})
+	for i := range getCountries {
+		val := getCountries[i].(map[string]interface{})
+		setAllCountries = append(setAllCountries, glob.Countries{
+			val["code"].(string),
+			val["name"].(string),
+		})
+	}
+	return setAllCountries
+}
+
+func GetCountry(inn string) string {
+	for _, val := range glob.AllCountries {
+		if strings.EqualFold(val.Name, inn) || strings.EqualFold(val.Code, inn) {
+			return val.Name
+		}
+	}
+	return inn
+}
+
+func GetA3(inn string) string {
+	for _, val := range glob.AllCountries {
+		if strings.EqualFold(val.Name, inn) || strings.EqualFold(val.Code, inn) {
+			return val.Code
+		}
+	}
+	return inn
 }
 
 func DesensitizeString(inn string) string {

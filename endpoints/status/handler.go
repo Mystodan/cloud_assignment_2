@@ -17,7 +17,6 @@ func HandlerStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	// Handles the Url by splitting its value strating after the CASES_PATH
 	urlSplit := funcs.SplitURL(consts.STATUS_PATH, w, r)
-
 	if r.Method == http.MethodGet {
 		if urlSplit[0] == "" {
 			err := json.NewEncoder(w).Encode(getAPIstatus())
@@ -29,7 +28,5 @@ func HandlerStatus(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed, use GET", http.StatusMethodNotAllowed)
 		return
 	}
-
-	//fmt.Println(len(urlSplit), urlSplit)
 
 }

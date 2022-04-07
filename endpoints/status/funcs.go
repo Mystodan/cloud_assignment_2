@@ -3,7 +3,7 @@ package status
 import (
 	consts "assignment-2/constants"
 	funcs "assignment-2/endpoints"
-	"assignment-2/endpoints/notifications"
+	glob "assignment-2/global_types"
 	server "assignment-2/server/functions"
 	"fmt"
 	"net/http"
@@ -26,7 +26,7 @@ func checkAPIServices() map[string]string {
 	return returnAPIs
 }
 
-func getWebHooksAmount(inn map[string]notifications.Webhook) string {
+func getWebHooksAmount(inn map[string]glob.Webhook) string {
 	return fmt.Sprintf("%d registered webhooks", len(inn))
 }
 
@@ -35,7 +35,7 @@ func getAPIstatus() statusInterface {
 	return statusInterface{
 		APIstatuses["cases_api"],
 		APIstatuses["policy_api"],
-		getWebHooksAmount(notifications.GetAllWebhooks()),
+		getWebHooksAmount(glob.AllWebhooks),
 		consts.APP_VERSION,
 		fmt.Sprintf("%f", server.GetUptime(Timer).Seconds()) + "s",
 	}

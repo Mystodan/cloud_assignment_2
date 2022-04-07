@@ -5,7 +5,7 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"os"
+	"strings"
 
 	firestore "cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
@@ -24,12 +24,36 @@ func checkError(inn error) {
 		log.Fatal(inn)
 	}
 }
-
+func checkNum(inn string) bool {
+	for i := range inn {
+		if !(uint(inn[i]) >= 48 && uint(inn[i]) <= 57) {
+			return false
+		}
+	}
+	return true
+}
+func validPort(validity bool) string {
+	var retVal string
+	switch validity {
+	case true:
+		retVal = consts.PORT_NOTSET + consts.PORT_DEFAULT
+	case false:
+		retVal = consts.PORT_NOTSET + consts.PORT_INVALID + consts.PORT_DEFAULT
+	}
+	return retVal
+}
 func SetPort(inn string) string {
-	port := os.Getenv(consts.ENVK_PORT)
-	if IsEmpty(port) {
-		log.Println("$PORT has not been set. Default: " + inn)
+	var port string
+	innValidity := checkNum(inn)
+	if strings.ToLower(inn) == "default" || inn == "8080" {
+		log.Println(consts.PORT_DEFAULT + consts.DEFAULT_PORT)
+		port = consts.DEFAULT_PORT
+	} else if IsEmpty(inn) || !innValidity {
+		log.Println(validPort(innValidity) + consts.DEFAULT_PORT)
+		port = consts.DEFAULT_PORT
+	} else {
 		port = inn
+		log.Println(consts.PORT_SET + port)
 	}
 	return port
 }

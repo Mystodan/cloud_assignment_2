@@ -3,6 +3,8 @@ package cases
 import (
 	consts "assignment-2/constants"
 	funcs "assignment-2/endpoints"
+	"assignment-2/endpoints/notifications"
+	glob "assignment-2/global_types"
 	"encoding/json"
 	"net/http"
 )
@@ -21,7 +23,10 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "No country name inputted", http.StatusBadRequest)
 			return
 		}
-		country = funcs.DesensitizeString(country)
+
+		//country = funcs.DesensitizeString(country) - DEPRECATED
+
+		country = funcs.GetCountry(country)
 
 		getGraphql, err := funcs.GetGraphql(consts.CASES_API, formatRequest(country))
 		if funcs.HandleErr(err, w, http.StatusBadRequest) {
@@ -31,7 +36,14 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 		// wrap response
 		formattedResponse := wrapData(getGraphql)
 
-		// send to writer
+		// invoke webhooks, annd send to writer
+		if _, invoked := glob.CountryInvocations[country]; !invoked {
+			glob.CountryInvocations[country] = 0
+		}
+
+		glob.CountryInvocations[country]++
+		notifications.InvokeWebhooks(country, glob.CountryInvocations, glob.AllWebhooks)
+
 		err = json.NewEncoder(w).Encode(formattedResponse)
 		if funcs.HandleErr(err, w, http.StatusInternalServerError) {
 			return

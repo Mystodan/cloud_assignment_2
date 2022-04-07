@@ -29,8 +29,6 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		country = funcs.DesensitizeString(country)
-
 		// get optional parameter
 		var optParam string
 		if _, isScope := urlQuery["scope"]; isScope {
@@ -40,8 +38,11 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
-			optParam = time.Now().Format(consts.POLICY_DATE)
+			optParam = time.Now().AddDate(0, 0, -3).Format(consts.POLICY_DATE)
 		}
+
+		// convert to A3 code
+		country = funcs.GetA3(country)
 
 		// Send request to api
 		getRequest, err := funcs.RequestURL(formatRequest(country, optParam))

@@ -8,7 +8,10 @@ require (
 	google.golang.org/api v0.74.0
 )
 
-require github.com/pkg/errors v0.9.1 // indirect
+require (
+	github.com/biter777/countries v1.3.4 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+)
 
 require (
 	cloud.google.com/go v0.100.2 // indirect

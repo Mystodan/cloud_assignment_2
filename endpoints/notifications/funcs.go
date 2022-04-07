@@ -2,12 +2,17 @@ package notifications
 
 import (
 	consts "assignment-2/constants"
-	glob "assignment-2/globals"
+	glob "assignment-2/global_types"
+	"bytes"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"math/rand"
+	"net/http"
 )
 
+// Functions for webhook tokens
 func handleNewToken() string {
 	token := GenerateRandomToken()
 	for checkIfTokenExists(token) {
@@ -17,8 +22,8 @@ func handleNewToken() string {
 }
 
 func checkIfTokenExists(inn string) bool {
-	for i := range allWebhooks {
-		if allWebhooks[i].ID == inn {
+	for i := range glob.AllWebhooks {
+		if glob.AllWebhooks[i].ID == inn {
 			return true
 		}
 	}
@@ -33,25 +38,18 @@ func GenerateRandomToken() string {
 	return string(Token)
 }
 
-func sendWebhookToFB(webhook Webhook) (string, error) {
+func sendWebhookToFB(webhook glob.Webhook) (string, error) {
 	id, _, err := glob.Client.Collection(consts.Collection).Add(glob.Ctx, webhook)
 	return id.ID, err
 }
 
-func GetWebhook(id string, webhooks map[string]Webhook) (Webhook, error) {
+func GetWebhook(id string, webhooks map[string]glob.Webhook) (glob.Webhook, error) {
 	for _, webhook := range webhooks {
 		if webhook.ID == id {
 			return webhook, nil
 		}
 	}
-	return Webhook{}, errors.New("webhook(id): not found")
-}
-
-func GetAllWebhooks() map[string]Webhook {
-	return allWebhooks
-}
-func SetAllTokens(inn map[string]Webhook) {
-	allWebhooks = inn
+	return glob.Webhook{}, errors.New("webhook(id): not found")
 }
 
 /**
@@ -59,8 +57,8 @@ func SetAllTokens(inn map[string]Webhook) {
  *
  *	@return A map linking each webhook's doc ref/ID to their struct.
  */
-func LoadWebhooksFromFB() map[string]Webhook {
-	ret := make(map[string]Webhook) // Prepare return list
+func LoadWebhooksFromFB() map[string]glob.Webhook {
+	ret := make(map[string]glob.Webhook) // Prepare return list
 
 	// Iterate through firestore database...
 	loopThroughFireBase := glob.Client.Collection(consts.Collection).Documents(glob.Ctx)
@@ -71,7 +69,7 @@ func LoadWebhooksFromFB() map[string]Webhook {
 		doc := all[i]
 		// And fitting it into the Webhook struct.
 		data := doc.Data()
-		ret[doc.Ref.ID] = Webhook{
+		ret[doc.Ref.ID] = glob.Webhook{
 			ID:      data["ID"].(string),
 			Url:     data["Url"].(string),
 			Country: data["Country"].(string),
@@ -86,8 +84,8 @@ func LoadWebhooksFromFB() map[string]Webhook {
 	}
 	return ret
 }
-func DeleteWebhook(id string, webhooks *map[string]Webhook) (bool, error) {
-	var deleted = false
+func DeleteWebhook(id string, webhooks *map[string]glob.Webhook) (bool, error) {
+	deleted := false
 	// Delete from local webhooks, temporarily storing deleted entries
 	deletedWebhook := []string{}
 	for webhook_string, value := range *webhooks {
@@ -107,6 +105,7 @@ func DeleteWebhook(id string, webhooks *map[string]Webhook) (bool, error) {
 	}
 	return deleted, retVal
 }
+
 func handleDeleted(inn bool) string {
 	var retVal string
 	switch inn {
@@ -116,4 +115,51 @@ func handleDeleted(inn bool) string {
 		retVal = consts.TOKEN_DELETED_NOT_FOUND
 	}
 	return retVal
+}
+
+// functions for invocations
+
+/**
+ *	Invokes all webhooks (if applicable).
+ *
+ *	countryCalls - A map of each country and how many times they've been called.
+ */
+func InvokeWebhooks(country string, countryCalls map[string]int, webhooks map[string]glob.Webhook) {
+	invocations := countryCalls[country]
+	for _, webhook := range webhooks {
+		if webhook.Country == country && invocations%int(webhook.Calls) == 0 {
+			InvokeWebhook(webhook)
+		}
+	}
+}
+
+/**
+ *	Invokes a given webhook.
+ *
+ *	@param webhook - The webhook.
+ */
+func InvokeWebhook(webhook glob.Webhook) (interface{}, error) {
+	// prepare/wrap data for invocation
+	data := bytes.NewReader([]byte(fmt.Sprintf(`{
+		"webhook_id": "%s",
+		"country": "%s",
+		"calls": "%d"
+	}`, webhook.ID, webhook.Country, webhook.Calls)))
+
+	// create a post request to URL for invocation
+	POSTrequest, err := http.NewRequest(http.MethodPost, webhook.Url, data)
+	if err != nil {
+		return "", err
+	}
+
+	var client http.Client = http.Client{}
+	resp, err := client.Do(POSTrequest)
+	if err != nil {
+		return "", err
+	}
+
+	// Read the response
+	var response interface{}
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	return response, err
 }
