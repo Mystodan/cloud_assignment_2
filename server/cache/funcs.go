@@ -28,11 +28,25 @@ func encloseParam(inn ...string) string {
  *	Gets existing data from cache, unless...
  */
 func GetCache(inn ...string) (map[string]interface{}, error) {
-	encloseParams := encloseParam(inn...)
+	var encloseParams string
+	if len(inn) > 1 {
+		encloseParams = encloseParam(inn...)
+	} else {
+		encloseParams = inn[0]
+	}
 	if val, Get := glob.MemBuffer[encloseParams]; Get {
 		return val, nil
 	}
-	return map[string]interface{}{}, errors.New("no such data exists within cache")
+	return map[string]interface{}{}, errors.New("currently no data exists within cache")
+}
+
+func CheckIfCached(inn string) bool {
+	for i := range glob.MemBuffer {
+		if i == inn {
+			return true
+		}
+	}
+	return false
 }
 
 func checkTime(doc *firestore.DocumentSnapshot) bool {
@@ -43,9 +57,11 @@ func checkTime(doc *firestore.DocumentSnapshot) bool {
 /**
  *	Adds something to the cache
  */
-func AddToCache(inn map[string]interface{}, params ...string) error {
-	encloseParams := encloseParam(params...)
-	glob.MemBuffer[encloseParams] = inn
-	_, _, err := glob.Client.Collection(consts.COLLECTION_CACHE).Add(glob.Ctx, map[string]map[string]interface{}{encloseParams: inn})
+func AddToCache(name string, inn map[string]interface{}, params ...string) error {
+	var err error = nil
+	if !CheckIfCached(name) {
+		glob.MemBuffer[name] = inn
+		_, _, err = glob.Client.Collection(consts.COLLECTION_CACHE).Add(glob.Ctx, map[string]map[string]interface{}{name: inn})
+	}
 	return err
 }

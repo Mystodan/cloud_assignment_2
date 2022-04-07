@@ -51,6 +51,7 @@ func LoadCountries() []glob.Countries {
 	// read data as map[string]interface{}
 	json.Unmarshal(readCountries, &getAllCountries)
 	getCountries := getAllCountries["countries"].([]interface{})
+	log.Println("Loading Alpha3 library...")
 	for i := range getCountries {
 		val := getCountries[i].(map[string]interface{})
 		setAllCountries = append(setAllCountries, glob.Countries{
@@ -58,6 +59,7 @@ func LoadCountries() []glob.Countries {
 			val["name"].(string),
 		})
 	}
+	log.Println("Done!")
 	return setAllCountries
 }
 
@@ -91,9 +93,9 @@ func DesensitizeString(inn string) string {
  */
 func checkError(inn error) bool {
 	if inn != nil {
-		log.Fatal(inn)
 		return false
 	}
+	log.Fatal(inn)
 	return true
 }
 
@@ -120,7 +122,7 @@ func HandleURL(inn string) []string {
 
 }
 
-func GetGraphql(url string, body string) (map[string]interface{}, error) {
+func GetGraphql(name string, url string, body string) (map[string]interface{}, error) {
 	returnVal, err := cache.GetCache(url, body)
 	if err != nil {
 		// Send request to graphql api
@@ -129,27 +131,26 @@ func GetGraphql(url string, body string) (map[string]interface{}, error) {
 
 		err = urlClientHandler.Run(context.Background(), urlRequestResponse, &returnVal)
 		if err == nil { // If no errors
-			cache.AddToCache(returnVal, url, body) // Adds to cache
+			cache.AddToCache(name, returnVal, url, body) // Adds to cache
 		}
 	}
+
 	return returnVal, err
 }
 
-func RequestURL(url string) (map[string]interface{}, error) {
+func RequestURL(name string, url string) (map[string]interface{}, error) {
 	returnVal, err := cache.GetCache(url)
+
 	if !checkError(err) {
 		// Send request to API
-		resp, err := GetURL(url)
-		if !checkError(err) {
-			return map[string]interface{}{}, err
-		} // Attempt to decode
-		err = json.NewDecoder(resp.Body).Decode(&returnVal)
-		if err != nil {
-			return map[string]interface{}{}, err
-		}
-		cache.AddToCache(returnVal, url)
-	}
+		resp, _ := GetURL(url)
 
+		// Attempt to decode
+		err = json.NewDecoder(resp.Body).Decode(&returnVal)
+		if err == nil {
+			cache.AddToCache(name, returnVal, url)
+		}
+	}
 	// Return
 	return returnVal, err
 }

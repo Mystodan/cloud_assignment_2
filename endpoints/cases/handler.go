@@ -27,7 +27,7 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 
 		country = funcs.GetCountry(country)
 
-		getGraphql, err := funcs.GetGraphql(consts.CASES_API, formatRequest(country))
+		getGraphql, err := funcs.GetGraphql(country, consts.CASES_API, formatRequest(country))
 		if funcs.HandleErr(err, w, http.StatusBadRequest) {
 			return
 		}

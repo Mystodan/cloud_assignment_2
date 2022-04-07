@@ -19,7 +19,6 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 	urlQuery := r.URL.Query()
 
 	if r.Method == http.MethodGet {
-
 		country := urlSplit[0]
 		if len(country) < 1 {
 			http.Error(w, "No country name inputted", http.StatusBadRequest)
@@ -44,9 +43,8 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 
 		// convert to A3 code
 		country = funcs.GetA3(country)
-
 		// Send request to api
-		getRequest, err := funcs.RequestURL(formatRequest(country, optParam))
+		getRequest, err := funcs.RequestURL(country, formatRequest(country, optParam))
 		if err != nil {
 			http.Error(w, "Error sending request to covidtracker API", http.StatusFailedDependency)
 			return

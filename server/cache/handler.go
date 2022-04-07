@@ -14,6 +14,7 @@ import (
 func LoadCacheFromFB() map[string]map[string]interface{} {
 	retVal := make(map[string]map[string]interface{}) // Prepare return list
 
+	log.Println("Loading cache...")
 	// Loops through firestore database...
 	loopThroughFireBase := glob.Client.Collection(consts.COLLECTION_CACHE).Documents(glob.Ctx)
 	all, _ := loopThroughFireBase.GetAll()
