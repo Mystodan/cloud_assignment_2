@@ -39,7 +39,7 @@ func GenerateRandomToken() string {
 }
 
 func sendWebhookToFB(webhook glob.Webhook) (string, error) {
-	id, _, err := glob.Client.Collection(consts.Collection).Add(glob.Ctx, webhook)
+	id, _, err := glob.Client.Collection(consts.COLLECTION_WEBHOOKS).Add(glob.Ctx, webhook)
 	return id.ID, err
 }
 
@@ -58,47 +58,47 @@ func GetWebhook(id string, webhooks map[string]glob.Webhook) (glob.Webhook, erro
  *	@return A map linking each webhook's doc ref/ID to their struct.
  */
 func LoadWebhooksFromFB() map[string]glob.Webhook {
-	ret := make(map[string]glob.Webhook) // Prepare return list
+	retVal := make(map[string]glob.Webhook) // Prepare return list
 
 	// Iterate through firestore database...
-	loopThroughFireBase := glob.Client.Collection(consts.Collection).Documents(glob.Ctx)
+	loopThroughFireBase := glob.Client.Collection(consts.COLLECTION_WEBHOOKS).Documents(glob.Ctx)
 	all, _ := loopThroughFireBase.GetAll()
 	log.Println("Loading webhooks...")
 
 	for i := 0; i < len(all); i++ {
+		// reads data
 		doc := all[i]
-		// And fitting it into the Webhook struct.
+		// Thereafter fits it into the Webhook struct.
 		data := doc.Data()
-		ret[doc.Ref.ID] = glob.Webhook{
+		retVal[doc.Ref.ID] = glob.Webhook{
 			ID:      data["ID"].(string),
 			Url:     data["Url"].(string),
 			Country: data["Country"].(string),
 			Calls:   data["Calls"].(int64),
 		}
-
 	}
 	if len(all) < 1 {
 		log.Println("No webhooks to load!")
 	} else {
 		log.Println("Done!")
 	}
-	return ret
+	return retVal
 }
 func DeleteWebhook(id string, webhooks *map[string]glob.Webhook) (bool, error) {
 	deleted := false
 	// Delete from local webhooks, temporarily storing deleted entries
-	deletedWebhook := []string{}
+	deletedWebhooks := []string{}
 	for webhook_string, value := range *webhooks {
 		if value.ID == id {
 			deleted = true
-			deletedWebhook = append(deletedWebhook, webhook_string)
+			deletedWebhooks = append(deletedWebhooks, webhook_string)
 			delete(*webhooks, webhook_string)
 		}
 	}
 	// Loop through temporarily stored webhooks, matching, thereafter deleting them from FireStore database
 	var retVal error = nil
-	for _, webhook_string := range deletedWebhook {
-		_, delErr := glob.Client.Collection(consts.Collection).Doc(webhook_string).Delete(glob.Ctx)
+	for _, webhook_string := range deletedWebhooks {
+		_, delErr := glob.Client.Collection(consts.COLLECTION_WEBHOOKS).Doc(webhook_string).Delete(glob.Ctx)
 		if delErr != nil {
 			retVal = delErr
 		}
@@ -162,4 +162,12 @@ func InvokeWebhook(webhook glob.Webhook) (interface{}, error) {
 	var response interface{}
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	return response, err
+}
+func SetInvocation(country string) {
+	if _, invoked := glob.CountryInvocations[country]; !invoked {
+		glob.CountryInvocations[country] = 0
+	}
+
+	glob.CountryInvocations[country]++
+	InvokeWebhooks(country, glob.CountryInvocations, glob.AllWebhooks)
 }

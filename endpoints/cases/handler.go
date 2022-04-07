@@ -4,7 +4,6 @@ import (
 	consts "assignment-2/constants"
 	funcs "assignment-2/endpoints"
 	"assignment-2/endpoints/notifications"
-	glob "assignment-2/global_types"
 	"encoding/json"
 	"net/http"
 )
@@ -37,12 +36,7 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 		formattedResponse := wrapData(getGraphql)
 
 		// invoke webhooks, annd send to writer
-		if _, invoked := glob.CountryInvocations[country]; !invoked {
-			glob.CountryInvocations[country] = 0
-		}
-
-		glob.CountryInvocations[country]++
-		notifications.InvokeWebhooks(country, glob.CountryInvocations, glob.AllWebhooks)
+		notifications.SetInvocation(country)
 
 		err = json.NewEncoder(w).Encode(formattedResponse)
 		if funcs.HandleErr(err, w, http.StatusInternalServerError) {

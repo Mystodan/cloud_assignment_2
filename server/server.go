@@ -3,7 +3,7 @@ package main
 import (
 	//constants
 	consts "assignment-2/constants"
-	funcs "assignment-2/endpoints"
+
 	glob "assignment-2/global_types"
 	"math/rand"
 	"time"
@@ -15,6 +15,7 @@ import (
 	status "assignment-2/endpoints/status"
 
 	// server
+
 	server "assignment-2/server/functions"
 	"context"
 	"net/http"
@@ -39,10 +40,9 @@ func main() {
 	// Instantiate client
 	glob.Client = server.InstantiateFBClient(app, glob.Ctx)
 
-	// Load all webhooks
-	glob.AllWebhooks = notifications.LoadWebhooksFromFB()
-	// Load all countries and alpha codes
-	glob.AllCountries = funcs.LoadCountries()
+	// Load all dependancies
+	server.LoadAllDependancies()
+
 	// Close down client
 	defer server.CloseFB(glob.Client)
 

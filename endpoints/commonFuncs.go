@@ -3,6 +3,7 @@ package funcs
 import (
 	consts "assignment-2/constants"
 	glob "assignment-2/global_types"
+	"assignment-2/server/cache"
 	"context"
 	"encoding/json"
 	"io/ioutil"
@@ -91,17 +92,16 @@ func DesensitizeString(inn string) string {
 func checkError(inn error) bool {
 	if inn != nil {
 		log.Fatal(inn)
-		return true
+		return false
 	}
-	return false
+	return true
 }
 
 /**	Get issues a GET to the specified URL.
  *	@param inn - URL
  */
-func GetURL(inn string) (*http.Response, bool, error) {
-	ret, err := http.Get(inn)
-	return ret, checkError(err), err
+func GetURL(inn string) (*http.Response, error) {
+	return http.Get(inn)
 }
 
 /**	HandleErr logs an error.
@@ -121,26 +121,33 @@ func HandleURL(inn string) []string {
 }
 
 func GetGraphql(url string, body string) (map[string]interface{}, error) {
-	var returnVal map[string]interface{}
-	// Send request to graphql api
-	urlClientHandler := graphql.NewClient(url)
-	urlRequestResponse := graphql.NewRequest(body)
+	returnVal, err := cache.GetCache(url, body)
+	if err != nil {
+		// Send request to graphql api
+		urlClientHandler := graphql.NewClient(url)
+		urlRequestResponse := graphql.NewRequest(body)
 
-	err := urlClientHandler.Run(context.Background(), urlRequestResponse, &returnVal)
+		err = urlClientHandler.Run(context.Background(), urlRequestResponse, &returnVal)
+		if err == nil { // If no errors
+			cache.AddToCache(returnVal, url, body) // Adds to cache
+		}
+	}
 	return returnVal, err
 }
 
 func RequestURL(url string) (map[string]interface{}, error) {
-	resp, state, err := GetURL(url)
-	if state {
-		return map[string]interface{}{}, err
-	}
-
-	// Attempt to decode
-	var returnVal map[string]interface{}
-	err = json.NewDecoder(resp.Body).Decode(&returnVal)
-	if err != nil {
-		return map[string]interface{}{}, err
+	returnVal, err := cache.GetCache(url)
+	if !checkError(err) {
+		// Send request to API
+		resp, err := GetURL(url)
+		if !checkError(err) {
+			return map[string]interface{}{}, err
+		} // Attempt to decode
+		err = json.NewDecoder(resp.Body).Decode(&returnVal)
+		if err != nil {
+			return map[string]interface{}{}, err
+		}
+		cache.AddToCache(returnVal, url)
 	}
 
 	// Return

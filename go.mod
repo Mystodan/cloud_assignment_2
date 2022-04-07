@@ -9,7 +9,7 @@ require (
 )
 
 require (
-	github.com/biter777/countries v1.3.4 // indirect
+	github.com/matryer/is v1.4.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 )
 

@@ -2,6 +2,10 @@ package server
 
 import (
 	consts "assignment-2/constants"
+	funcs "assignment-2/endpoints"
+	"assignment-2/endpoints/notifications"
+	glob "assignment-2/global_types"
+	"assignment-2/server/cache"
 	"context"
 	"log"
 	"net/http"
@@ -56,6 +60,12 @@ func SetPort(inn string) string {
 		log.Println(consts.PORT_SET + port)
 	}
 	return port
+}
+
+func LoadAllDependancies() {
+	glob.AllWebhooks = notifications.LoadWebhooksFromFB() // webhooks from firebase
+	glob.MemBuffer = cache.LoadCacheFromFB()              // cache from firebase
+	glob.AllCountries = funcs.LoadCountries()             // Alpha3 from local library
 }
 
 func SetListener(inn string) {

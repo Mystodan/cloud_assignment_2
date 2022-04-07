@@ -3,6 +3,7 @@ package policy
 import (
 	consts "assignment-2/constants"
 	funcs "assignment-2/endpoints"
+	"assignment-2/endpoints/notifications"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -53,6 +54,8 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 		// wrap response
 		formattedResponse := wrapData(getRequest)
 
+		// invoke webhooks, annd send to writer
+		notifications.SetInvocation(funcs.GetCountry(country))
 		// send to writer
 		err = json.NewEncoder(w).Encode(formattedResponse)
 		if funcs.HandleErr(err, w, http.StatusInternalServerError) {

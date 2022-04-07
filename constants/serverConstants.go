@@ -19,3 +19,7 @@ const CASES_PATH = "/corona/" + APP_VERSION + "/cases/"
 const POLICY_PATH = "/corona/" + APP_VERSION + "/policy/"
 const STATUS_PATH = "/corona/" + APP_VERSION + "/status/"
 const NOTIFICATIONS_PATH = "/corona/" + APP_VERSION + "/notifications/"
+
+// Cache timer
+const DAYS = 24
+const CACHE_TIMER = 2 * DAYS

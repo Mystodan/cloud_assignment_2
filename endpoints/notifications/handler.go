@@ -35,7 +35,7 @@ func HandlerNotifications(w http.ResponseWriter, r *http.Request) {
 			// saves webhook to local storage
 			glob.AllWebhooks[id] = webHook
 			// outputs
-			err = json.NewEncoder(w).Encode(map[string]string{"webhook_id": webHook.ID, "firebase_id": id})
+			err = json.NewEncoder(w).Encode(map[string]string{"webhook_id": webHook.ID})
 			if funcs.HandleErr(err, w, http.StatusInternalServerError) {
 				return
 			}
@@ -76,14 +76,15 @@ func HandlerNotifications(w http.ResponseWriter, r *http.Request) {
 					if funcs.HandleErr(err, w, http.StatusInternalServerError) {
 						return
 					}
-					// outputs
-					err = json.NewEncoder(w).Encode(webhook)
-					if err != nil {
-						if funcs.HandleErr(err, w, http.StatusInternalServerError) {
-							return
-						}
+				}
+				// outputs
+				err = json.NewEncoder(w).Encode(webhook)
+				if err != nil {
+					if funcs.HandleErr(err, w, http.StatusInternalServerError) {
+						return
 					}
 				}
+
 			}
 		}
 

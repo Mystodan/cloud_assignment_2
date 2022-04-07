@@ -16,7 +16,7 @@ func checkAPIServices() map[string]string {
 		"policy_api": consts.POLICY_API + consts.POLICY_TEST,
 	}
 	for api, url := range compare {
-		response, _, _ := funcs.GetURL(url)
+		response, _ := funcs.GetURL(url)
 		if response.StatusCode == http.StatusBadRequest || response.StatusCode == http.StatusOK {
 			returnAPIs[api] = http.StatusText(http.StatusOK)
 		} else {
