@@ -1,13 +1,13 @@
 package consts
 
 // Alpha3
-const ALPHA3_PATH = "global_types/alpha3.json"
+const ALPHA3_PATH = "./global_types/alpha3.json"
 
 //FireBase
-const SERVICEKEY_PATH = "serviceKey/serviceAccountKey.json"
+const SERVICEKEY_PATH = "./serviceKey/serviceAccountKey.json"
 
 //stubs
-const STUB_FILEPATH = "endpoints/testing/stubs/stubbing.json"
+const STUB_FILEPATH = "./endpoints/testing/stubs/stubbing.json"
 
 // APIs
 const CASES_API = "https://covid19-graphql.vercel.app/"
