@@ -2,23 +2,26 @@ package policy
 
 import (
 	consts "assignment-2/constants"
-	funcs "assignment-2/endpoints"
+	"assignment-2/globals/common"
+
 	"assignment-2/endpoints/notifications"
 	"encoding/json"
 	"net/http"
 	"time"
 )
 
+var Url string
+
 /**
  *	Handler for 'policy' endpoint
  */
 func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("content-type", "application/json")
 	// Handles the Url by splitting its value strating after the CASES_PATH
-	urlSplit := funcs.SplitURL(consts.POLICY_PATH, w, r)
+	urlSplit := common.SplitURL(Url, w, r)
 	urlQuery := r.URL.Query()
 
 	if r.Method == http.MethodGet {
+		w.Header().Add("content-type", "application/json")
 		country := urlSplit[0]
 		if len(country) < 1 {
 			http.Error(w, "No country name inputted", http.StatusBadRequest)
@@ -34,7 +37,7 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 		if _, isScope := urlQuery["scope"]; isScope {
 			optParam = urlQuery["scope"][0]
 
-			if _, err := time.Parse(consts.POLICY_DATE, optParam); funcs.HandleErr(err, w, http.StatusBadRequest) {
+			if _, err := time.Parse(consts.POLICY_DATE, optParam); common.HandleErr(err, w, http.StatusBadRequest) {
 				return
 			}
 		} else {
@@ -42,9 +45,9 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// convert to A3 code
-		country = funcs.GetA3(country)
+		country = common.GetA3(country)
 		// Send request to api
-		getRequest, err := funcs.RequestURL(country, formatRequest(country, optParam))
+		getRequest, err := common.RequestURL(country, formatRequest(country, optParam))
 		if err != nil {
 			http.Error(w, "Error sending request to covidtracker API", http.StatusFailedDependency)
 			return
@@ -53,14 +56,15 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 		formattedResponse := wrapData(getRequest)
 
 		// invoke webhooks, annd send to writer
-		notifications.SetInvocation(funcs.GetCountry(country))
+		DesensitizeString, _ := common.GetCountry(country)
+		notifications.SetInvocation(DesensitizeString)
 		// send to writer
 		err = json.NewEncoder(w).Encode(formattedResponse)
-		if funcs.HandleErr(err, w, http.StatusInternalServerError) {
+		if common.HandleErr(err, w, http.StatusInternalServerError) {
 			return
 		}
 	} else {
-		http.Error(w, "Method not allowed, use GET", http.StatusMethodNotAllowed)
+		http.Error(w, common.MethodAllowed("GET"), http.StatusMethodNotAllowed)
 		return
 	}
 

@@ -1,11 +1,12 @@
-package funcs
+package common
 
 import (
+	"assignment-2/cmd/cache"
 	consts "assignment-2/constants"
-	glob "assignment-2/global_types"
-	"assignment-2/server/cache"
+	glob "assignment-2/globals"
 	"context"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -15,25 +16,15 @@ import (
 	"github.com/machinebox/graphql"
 )
 
-func POLICY_AVAILABLE(CountryCode string, Scope string, Stringency string, Policies string) glob.Policy {
-	return glob.Policy{CountryCode, Scope, Stringency, Policies}
-}
-func CASE_AVAILABLE(Country string, Date string, Confirmed float64, Recovered float64, Deaths float64, Growth_rate float64) glob.Case {
-	return glob.Case{Country, Date, Confirmed, Recovered, Deaths, Growth_rate}
-}
-func POLICY_UNAVAILABLE() glob.Policy {
-	return POLICY_AVAILABLE(
-		consts.APP_VALUE_UNAVAILABLE,
-		consts.APP_VALUE_UNAVAILABLE,
-		consts.APP_VALUE_UNAVAILABLE,
-		consts.APP_VALUE_UNAVAILABLE,
-	)
-}
-
 func SplitURL(path string, w http.ResponseWriter, r *http.Request) []string {
 
+	// Handles when path incorrecly adds "/" to the end of url
+	Sensitivity := len(path)
+	if Sensitivity > len(r.URL.EscapedPath()) {
+		Sensitivity--
+	}
 	// Handles the Url by splitting its value strating after the CASES_PATH
-	urlSplit := HandleURL(r.URL.EscapedPath()[len(path):])
+	urlSplit := HandleURL(r.URL.EscapedPath()[Sensitivity:])
 	// Check if the user input enough args
 	if len(urlSplit) < 1 {
 		http.Error(w, "Not enough arguments, see documentation", http.StatusBadRequest)
@@ -63,13 +54,14 @@ func LoadCountries() []glob.Countries {
 	return setAllCountries
 }
 
-func GetCountry(inn string) string {
+func GetCountry(inn string) (string, error) {
+	inn = strings.Replace(inn, "%20", " ", -1)
 	for _, val := range glob.AllCountries {
 		if strings.EqualFold(val.Name, inn) || strings.EqualFold(val.Code, inn) {
-			return val.Name
+			return val.Name, nil
 		}
 	}
-	return inn
+	return inn, errors.New(consts.CODE_NOT_REGISTERED)
 }
 
 func GetA3(inn string) string {
@@ -81,6 +73,7 @@ func GetA3(inn string) string {
 	return inn
 }
 
+//Deprecated
 func DesensitizeString(inn string) string {
 	inn = strings.ToLower(inn)
 	r := []rune(inn)
@@ -97,6 +90,10 @@ func checkError(inn error) bool {
 	}
 	log.Fatal(inn)
 	return true
+}
+
+func MethodAllowed(method string) string {
+	return consts.METHOD_NOT_ALLOWED + method
 }
 
 /**	Get issues a GET to the specified URL.
@@ -119,7 +116,6 @@ func HandleErr(err error, w http.ResponseWriter, code int) bool {
 
 func HandleURL(inn string) []string {
 	return strings.Split(inn, "/")
-
 }
 
 func GetGraphql(name string, url string, body string) (map[string]interface{}, error) {

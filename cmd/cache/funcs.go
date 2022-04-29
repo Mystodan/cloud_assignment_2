@@ -2,7 +2,7 @@ package cache
 
 import (
 	consts "assignment-2/constants"
-	glob "assignment-2/global_types"
+	glob "assignment-2/globals"
 	"errors"
 	"time"
 

@@ -1,22 +1,24 @@
 package cases
 
 import (
-	consts "assignment-2/constants"
-	funcs "assignment-2/endpoints"
 	"assignment-2/endpoints/notifications"
+	"assignment-2/globals/common"
+	funcs "assignment-2/globals/common"
 	"encoding/json"
 	"net/http"
 )
+
+var Url string
 
 /**
  *	Handler for 'cases' endpoint
  */
 func HandlerCases(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("content-type", "application/json")
 	// Handles the Url by splitting its value strating after the CASES_PATH
-	urlSplit := funcs.SplitURL(consts.CASES_PATH, w, r)
+	urlSplit := funcs.SplitURL(Url, w, r)
 
 	if r.Method == http.MethodGet {
+		w.Header().Add("content-type", "application/json")
 		country := urlSplit[0]
 		if len(country) < 1 {
 			http.Error(w, "No country name inputted", http.StatusBadRequest)
@@ -24,10 +26,9 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//country = funcs.DesensitizeString(country) - DEPRECATED
+		country, _ = funcs.GetCountry(country)
 
-		country = funcs.GetCountry(country)
-
-		getGraphql, err := funcs.GetGraphql(country, consts.CASES_API, formatRequest(country))
+		getGraphql, err := funcs.GetGraphql(country, Url, formatRequest(country))
 		if funcs.HandleErr(err, w, http.StatusBadRequest) {
 			return
 		}
@@ -44,7 +45,7 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else {
-		http.Error(w, "Method not allowed, use GET", http.StatusMethodNotAllowed)
+		http.Error(w, common.MethodAllowed("GET"), http.StatusMethodNotAllowed)
 		return
 	}
 

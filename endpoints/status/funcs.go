@@ -2,12 +2,16 @@ package status
 
 import (
 	consts "assignment-2/constants"
-	funcs "assignment-2/endpoints"
-	glob "assignment-2/global_types"
-	server "assignment-2/server/functions"
+	glob "assignment-2/globals"
+	"assignment-2/globals/common"
 	"fmt"
 	"net/http"
+	"time"
 )
+
+func GetUptime(inn time.Time) time.Duration {
+	return time.Since(inn)
+}
 
 func checkAPIServices() map[string]string {
 	returnAPIs := map[string]string{}
@@ -16,18 +20,18 @@ func checkAPIServices() map[string]string {
 		"policy_api": consts.POLICY_API + consts.POLICY_TEST,
 	}
 	for api, url := range compare {
-		response, _ := funcs.GetURL(url)
+		response, _ := common.GetURL(url)
 		if response.StatusCode == http.StatusBadRequest || response.StatusCode == http.StatusOK {
-			returnAPIs[api] = http.StatusText(http.StatusOK)
+			returnAPIs[api] = fmt.Sprint(http.StatusOK)
 		} else {
-			returnAPIs[api] = http.StatusText(http.StatusServiceUnavailable)
+			returnAPIs[api] = fmt.Sprint(http.StatusServiceUnavailable)
 		}
 	}
 	return returnAPIs
 }
 
-func getWebHooksAmount(inn map[string]glob.Webhook) string {
-	return fmt.Sprintf("%d registered webhooks", len(inn))
+func getWebHooksAmount(inn map[string]glob.Webhook) int {
+	return len(inn)
 }
 
 func getAPIstatus() statusInterface {
@@ -37,6 +41,6 @@ func getAPIstatus() statusInterface {
 		APIstatuses["policy_api"],
 		getWebHooksAmount(glob.AllWebhooks),
 		consts.APP_VERSION,
-		fmt.Sprintf("%f", server.GetUptime(Timer).Seconds()) + "s",
+		int64(GetUptime(Timer).Seconds()),
 	}
 }

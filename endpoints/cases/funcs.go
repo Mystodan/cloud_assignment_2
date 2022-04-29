@@ -1,8 +1,6 @@
 package cases
 
 import (
-	funcs "assignment-2/endpoints"
-	glob "assignment-2/global_types"
 	"fmt"
 )
 
@@ -23,16 +21,16 @@ func formatRequest(inn string) string {
 	`, inn)
 }
 
-func wrapData(data map[string]interface{}) glob.Case {
+func wrapData(data map[string]interface{}) Case {
 	data = (data["country"].(map[string]interface{}))
 	mostRecentData := data["mostRecent"].(map[string]interface{})
 
-	return funcs.CASE_AVAILABLE(
+	return Case{
 		data["name"].(string),
 		mostRecentData["date"].(string),
 		mostRecentData["confirmed"].(float64),
 		mostRecentData["recovered"].(float64),
 		mostRecentData["deaths"].(float64),
 		mostRecentData["growthRate"].(float64),
-	)
+	}
 }

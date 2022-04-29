@@ -2,41 +2,46 @@ package notifications
 
 import (
 	consts "assignment-2/constants"
-	funcs "assignment-2/endpoints"
-	glob "assignment-2/global_types"
+	glob "assignment-2/globals"
+	"assignment-2/globals/common"
 	"encoding/json"
 	"net/http"
 )
+
+var Url string
 
 /**
  *	Handler for 'notifications' endpoint
  */
 func HandlerNotifications(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("content-type", "application/json")
 	// Handles the Url by splitting its value strating after the NOTIFICATION_PATH
-	urlSplit := funcs.SplitURL(consts.NOTIFICATIONS_PATH, w, r)
-
+	urlSplit := common.SplitURL(Url, w, r)
 	switch r.Method {
-
 	case http.MethodPost:
 		{
+			w.Header().Add("content-type", "application/json")
 			webHook := glob.Webhook{}
 			err := json.NewDecoder(r.Body).Decode(&webHook)
-			if funcs.HandleErr(err, w, http.StatusBadRequest) {
+			if common.HandleErr(err, w, http.StatusBadRequest) {
 				return
 			}
 			// create a new token
 			webHook.ID = handleNewToken()
+			webHook.Country, err = common.GetCountry(webHook.Country)
+			if common.HandleErr(err, w, http.StatusInternalServerError) {
+				return
+			}
 			// sends new webhook to firestore
 			id, err := sendWebhookToFB(webHook)
-			if funcs.HandleErr(err, w, http.StatusInternalServerError) {
+			if common.HandleErr(err, w, http.StatusInternalServerError) {
 				return
 			}
 			// saves webhook to local storage
 			glob.AllWebhooks[id] = webHook
 			// outputs
+			w.WriteHeader(http.StatusCreated)
 			err = json.NewEncoder(w).Encode(map[string]string{"webhook_id": webHook.ID})
-			if funcs.HandleErr(err, w, http.StatusInternalServerError) {
+			if common.HandleErr(err, w, http.StatusInternalServerError) {
 				return
 			}
 		}
@@ -45,48 +50,59 @@ func HandlerNotifications(w http.ResponseWriter, r *http.Request) {
 		{
 			// Check that the args are valid
 			if len(urlSplit) < 1 || urlSplit[0] == "" {
-				http.Error(w, "missing webhook(id) for deletion", http.StatusBadRequest)
+				http.Error(w, consts.INPUT_NOT_FOUND, http.StatusBadRequest)
 				return
 			}
 			// Delete webhook from database
 			deleted, delErr := DeleteWebhook(urlSplit[0], &glob.AllWebhooks)
-			if funcs.HandleErr(delErr, w, http.StatusInternalServerError) {
+			if common.HandleErr(delErr, w, http.StatusInternalServerError) {
 				return
 			}
-			err := json.NewEncoder(w).Encode(urlSplit[0] + handleDeleted(deleted))
-			if funcs.HandleErr(err, w, http.StatusInternalServerError) {
-				return
+			if !deleted {
+				w.WriteHeader(http.StatusBadRequest)
+			} else {
+				w.WriteHeader(http.StatusAccepted)
 			}
-
+			w.Write([]byte(urlSplit[0] + handleDeleted(deleted)))
+			//err := json.NewEncoder(w).Encode(urlSplit[0] + handleDeleted(deleted)) -- DEPRECATED
 		}
 
 	case http.MethodGet:
 		{
-			// Getting ALL registered webhooks
-			if len(urlSplit) < 1 || len(urlSplit[0]) < 1 {
-				err := json.NewEncoder(w).Encode(glob.AllWebhooks)
-				if funcs.HandleErr(err, w, http.StatusInternalServerError) {
-					return
-				}
-				// Getting a specific webhook
-			} else {
-				ID := urlSplit[0]
-				webhook, err := GetWebhook(ID, glob.AllWebhooks)
-				if err != nil {
-					if funcs.HandleErr(err, w, http.StatusInternalServerError) {
+			w.Header().Add("content-type", "application/json")
+			if len(glob.AllWebhooks) > 0 {
+				// Getting ALL registered webhooks
+				if len(urlSplit) < 1 || len(urlSplit[0]) < 1 {
+					err := json.NewEncoder(w).Encode(glob.AllWebhooks)
+					if common.HandleErr(err, w, http.StatusInternalServerError) {
 						return
 					}
-				}
-				// outputs
-				err = json.NewEncoder(w).Encode(webhook)
-				if err != nil {
-					if funcs.HandleErr(err, w, http.StatusInternalServerError) {
-						return
+					// Getting a specific webhook
+				} else {
+					ID := urlSplit[0]
+					webhook, err := GetWebhook(ID, glob.AllWebhooks)
+					if err != nil {
+						if common.HandleErr(err, w, http.StatusInternalServerError) {
+							return
+						}
 					}
-				}
+					// outputs
+					err = json.NewEncoder(w).Encode(webhook)
+					if err != nil {
+						if common.HandleErr(err, w, http.StatusInternalServerError) {
+							return
+						}
+					}
 
+				}
+			} else {
+				w.Write([]byte("No Webhooks registered yet"))
 			}
 		}
-
+	default:
+		{
+			http.Error(w, common.MethodAllowed("GET, POST or DELETE"), http.StatusMethodNotAllowed)
+			return
+		}
 	}
 }

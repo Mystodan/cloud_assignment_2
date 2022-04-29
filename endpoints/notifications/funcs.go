@@ -2,7 +2,7 @@ package notifications
 
 import (
 	consts "assignment-2/constants"
-	glob "assignment-2/global_types"
+	glob "assignment-2/globals"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -10,6 +10,8 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+
+	"google.golang.org/api/iterator"
 )
 
 // Functions for webhook tokens
@@ -49,7 +51,7 @@ func GetWebhook(id string, webhooks map[string]glob.Webhook) (glob.Webhook, erro
 			return webhook, nil
 		}
 	}
-	return glob.Webhook{}, errors.New("webhook(id): not found")
+	return glob.Webhook{}, errors.New(consts.INPUT_NOT_FOUND)
 }
 
 /**
@@ -62,12 +64,21 @@ func LoadWebhooksFromFB() map[string]glob.Webhook {
 
 	// Iterate through firestore database...
 	loopThroughFireBase := glob.Client.Collection(consts.COLLECTION_WEBHOOKS).Documents(glob.Ctx)
-	all, _ := loopThroughFireBase.GetAll()
+
 	log.Println("Loading webhooks...")
 
-	for i := 0; i < len(all); i++ {
+	for {
 		// reads data
-		doc := all[i]
+		doc, err := loopThroughFireBase.Next()
+		if err == iterator.Done {
+			log.Println("Done!")
+			loopThroughFireBase.Stop()
+			break
+		}
+		if err != nil {
+			panic("Failed to load webhooks from firestore!")
+		}
+
 		// Thereafter fits it into the Webhook struct.
 		data := doc.Data()
 		retVal[doc.Ref.ID] = glob.Webhook{
@@ -76,11 +87,6 @@ func LoadWebhooksFromFB() map[string]glob.Webhook {
 			Country: data["Country"].(string),
 			Calls:   data["Calls"].(int64),
 		}
-	}
-	if len(all) < 1 {
-		log.Println("No webhooks to load!")
-	} else {
-		log.Println("Done!")
 	}
 	return retVal
 }

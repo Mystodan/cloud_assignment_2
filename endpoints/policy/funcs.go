@@ -2,10 +2,7 @@ package policy
 
 import (
 	consts "assignment-2/constants"
-	funcs "assignment-2/endpoints"
-	glob "assignment-2/global_types"
 	"fmt"
-	"strconv"
 )
 
 func dataExists(list map[string]interface{}, data string) bool {
@@ -28,7 +25,7 @@ func getValidData(list map[string]interface{}, data string, data_code string) []
 	return retVal
 }
 
-func wrapData(data map[string]interface{}) glob.Policy {
+func wrapData(data map[string]interface{}) Policy {
 
 	// Get all valid policies
 	policies := getValidData(data, "policyActions", "policy_type_code")
@@ -37,7 +34,12 @@ func wrapData(data map[string]interface{}) glob.Policy {
 	// If there's no data, return a struct with value unavailable
 	inn := "msg"
 	if dataExists(data, inn) && data[inn].(string) == "Data unavailable" {
-		return funcs.POLICY_UNAVAILABLE()
+		return Policy{
+			fmt.Sprint(consts.POLICY_VALUE_UNAVAILABLE),
+			fmt.Sprint(consts.POLICY_VALUE_UNAVAILABLE),
+			float64(consts.POLICY_VALUE_UNAVAILABLE),
+			consts.POLICY_VALUE_UNAVAILABLE,
+		}
 	}
 	// Setter for stringency
 	var actual float64
@@ -47,14 +49,11 @@ func wrapData(data map[string]interface{}) glob.Policy {
 	if dataExists(data, inn) {
 		actual = data[inn].(float64)
 	}
-	// convert rest data to string
-	stringency := fmt.Sprintf("%f", actual)
-	policiesAmount := strconv.Itoa((len(policies)))
 
 	// Otherwise, fill it with the data form
-	return funcs.POLICY_AVAILABLE(
+	return Policy{
 		data["country_code"].(string),
 		data["date_value"].(string),
-		stringency,
-		policiesAmount)
+		actual,
+		int64(len(policies))}
 }
