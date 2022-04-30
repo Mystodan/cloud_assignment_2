@@ -35,15 +35,24 @@ Here are the dependencies for the project:
 - An IDE, we used <a href = https://code.visualstudio.com/download> VSCODE </a>
 - <a href = https://git-scm.com/downloads> Git bash package</a>
 - <a href = https://go.dev/dl/> Golang </a>
+- FireBase
+
+## Deployment
+Deployed on NTNU's OpenStack<br>
+serviceAccountKey for firebase was passed to the server using: <br> `scp -i MyKey.pem ./serviceAccountKey.json ubuntu@10.212.140.185:\assignment-2
+serviceAccountKey.json ` 
 
 #### Running the CODE~
 Use `go run .\server\server.go` to run from `localhost:8080` 
 > The default url would therefore be `localhost:8080/corona/v1/` 
 
+
 ## How to use...
 
+#### **0a.**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Special Requirement:
+###### -    IT IS REQUIRED THAT YOU CREATE A FOLDER IN `assignment-2` FOLDER AND PUT IN YOUR FIREBASE SERVICE KEY AS `serviceAccountKey.json` IN ORDER TO RUN IT LOCALLY<br>
 
-**0.**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Use `go run .\server\server.go` to run from `localhost:8080` or the already deployed `10.212.140.185:8080` <br>
+**0b.**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Use `go run .\server\server.go` to run from `localhost:8080` or the already deployed `10.212.140.185:8080` <br>
 -   **GET** requests using Postman <br>
     -   Use `/corona/v1/` with 
         -   `cases/{countryname, or alpha3 code}`, 
