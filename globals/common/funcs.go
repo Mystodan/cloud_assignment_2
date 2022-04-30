@@ -45,10 +45,10 @@ func LoadCountries() []glob.Countries {
 	log.Println("Loading Alpha3 library...")
 	for i := range getCountries {
 		val := getCountries[i].(map[string]interface{})
-		setAllCountries = append(setAllCountries, glob.Countries{
-			val["code"].(string),
-			val["name"].(string),
-		})
+		var value glob.Countries
+		value.Code = val["code"].(string)
+		value.Name = val["name"].(string)
+		setAllCountries = append(setAllCountries, value)
 	}
 	log.Println("Done!")
 	return setAllCountries
