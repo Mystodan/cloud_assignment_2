@@ -130,7 +130,6 @@ func GetGraphql(name string, url string, body string) (map[string]interface{}, e
 			cache.AddToCache(name, returnVal, url, body) // Adds to cache
 		}
 	}
-
 	return returnVal, err
 }
 

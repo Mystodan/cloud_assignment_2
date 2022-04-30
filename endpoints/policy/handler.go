@@ -57,7 +57,7 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 
 		// invoke webhooks, annd send to writer
 		DesensitizeString, _ := common.GetCountry(country)
-		notifications.SetInvocation(DesensitizeString)
+		go notifications.SetInvocation(DesensitizeString)
 		// send to writer
 		err = json.NewEncoder(w).Encode(formattedResponse)
 		if common.HandleErr(err, w, http.StatusInternalServerError) {
