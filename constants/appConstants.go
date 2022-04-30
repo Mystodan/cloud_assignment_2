@@ -14,6 +14,9 @@ const APP_TOKEN_LENGTH = 13
 // Policy format
 const POLICY_TEST = "NOR/2022-04-04"
 const POLICY_DATE = "2006-01-02"
+const POLICY_TIME_DAY = -2 // 2 days before current date, in order to get correct data
+const POLICY_TIME_MONTH = 0
+const POLICY_TIME_YEAR = 0
 
 // Cache
 const NEXT_PARAM = "<nextParam>"

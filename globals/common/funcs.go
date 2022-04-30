@@ -61,16 +61,16 @@ func GetCountry(inn string) (string, error) {
 			return val.Name, nil
 		}
 	}
-	return inn, errors.New(consts.CODE_NOT_REGISTERED)
+	return inn, errors.New(consts.COUNTRY_NOT_REGISTERED)
 }
 
-func GetA3(inn string) string {
+func GetA3(inn string) (string, error) {
 	for _, val := range glob.AllCountries {
 		if strings.EqualFold(val.Name, inn) || strings.EqualFold(val.Code, inn) {
-			return val.Code
+			return val.Code, nil
 		}
 	}
-	return inn
+	return inn, errors.New(consts.COUNTRY_NOT_REGISTERED)
 }
 
 //Deprecated

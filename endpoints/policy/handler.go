@@ -37,15 +37,18 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 		if _, isScope := urlQuery["scope"]; isScope {
 			optParam = urlQuery["scope"][0]
 
-			if _, err := time.Parse(consts.POLICY_DATE, optParam); common.HandleErr(err, w, http.StatusBadRequest) {
+			if _, err := time.Parse(consts.POLICY_DATE, optParam); common.HandleErr(err, w, http.StatusRequestedRangeNotSatisfiable) {
 				return
 			}
 		} else {
-			optParam = time.Now().AddDate(0, 0, -3).Format(consts.POLICY_DATE)
+			optParam = time.Now().AddDate(consts.POLICY_TIME_YEAR, consts.POLICY_TIME_MONTH, consts.POLICY_TIME_DAY).Format(consts.POLICY_DATE)
 		}
 
 		// convert to A3 code
-		country = common.GetA3(country)
+		country, err := common.GetA3(country)
+		if common.HandleErr(err, w, http.StatusNotAcceptable) {
+			return
+		}
 		// Send request to api
 		getRequest, err := common.RequestURL(country, formatRequest(country, optParam))
 		if err != nil {
@@ -55,7 +58,7 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 		// wrap response
 		formattedResponse := wrapData(getRequest)
 
-		// invoke webhooks, annd send to writer
+		// invoke webhooks on thread, and send to writer
 		DesensitizeString, _ := common.GetCountry(country)
 		go notifications.SetInvocation(DesensitizeString)
 		// send to writer

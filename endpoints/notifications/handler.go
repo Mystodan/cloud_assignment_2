@@ -50,18 +50,18 @@ func HandlerNotifications(w http.ResponseWriter, r *http.Request) {
 		{
 			// Check that the args are valid
 			if len(urlSplit) < 1 || urlSplit[0] == "" {
-				http.Error(w, consts.INPUT_NOT_FOUND, http.StatusBadRequest)
+				http.Error(w, consts.INPUT_NOT_FOUND, http.StatusNotAcceptable)
 				return
 			}
 			// Delete webhook from database
 			deleted, delErr := DeleteWebhook(urlSplit[0], &glob.AllWebhooks)
 			if common.HandleErr(delErr, w, http.StatusInternalServerError) {
 				return
-			}
+			} // Handles status messages on deleted or not
 			if !deleted {
-				w.WriteHeader(http.StatusBadRequest)
+				w.WriteHeader(http.StatusNotAcceptable)
 			} else {
-				w.WriteHeader(http.StatusAccepted)
+				w.WriteHeader(http.StatusOK)
 			}
 			w.Write([]byte(urlSplit[0] + handleDeleted(deleted)))
 			//err := json.NewEncoder(w).Encode(urlSplit[0] + handleDeleted(deleted)) -- DEPRECATED
@@ -96,6 +96,7 @@ func HandlerNotifications(w http.ResponseWriter, r *http.Request) {
 
 				}
 			} else {
+				w.WriteHeader(http.StatusNoContent)
 				w.Write([]byte("No Webhooks registered yet"))
 			}
 		}

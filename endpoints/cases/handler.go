@@ -26,8 +26,11 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		//country = funcs.DesensitizeString(country) - DEPRECATED
-		country, _ = funcs.GetCountry(country)
+		//country = funcs.DesensitizeString(country) - DEPRECATED (succeeded by GetA3 and GetCountry)
+		country, err := funcs.GetCountry(country)
+		if common.HandleErr(err, w, http.StatusNotAcceptable) {
+			return
+		}
 		getGraphql, err := funcs.GetGraphql(country, consts.CASES_API, formatRequest(country))
 		if funcs.HandleErr(err, w, http.StatusBadRequest) {
 			return
@@ -36,7 +39,7 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 		// wrap response
 		formattedResponse := wrapData(getGraphql)
 
-		// invoke webhooks, annd send to writer
+		// invoke webhooks on thread, and send to writer
 		go notifications.SetInvocation(country)
 
 		err = json.NewEncoder(w).Encode(formattedResponse)

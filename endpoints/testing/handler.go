@@ -26,7 +26,7 @@ func HandlerStub(w http.ResponseWriter, r *http.Request) {
 		} else if urlSplit[0] == "cases" {
 			if len(urlSplit) > 1 && urlSplit[1] != "" {
 				DesensitizeString, err := common.GetCountry(urlSplit[1])
-				if common.HandleErr(err, w, http.StatusInternalServerError) {
+				if common.HandleErr(err, w, http.StatusNotAcceptable) {
 					return
 				}
 				getCase := getValue(DesensitizeString, "country", "cases_stub", allStubs)
@@ -41,8 +41,12 @@ func HandlerStub(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		} else if urlSplit[0] == "policy" {
+			DesensitizeString, err := common.GetA3(urlSplit[1])
+			if common.HandleErr(err, w, http.StatusNotAcceptable) {
+				return
+			}
 			if len(urlSplit) > 1 && urlSplit[1] != "" {
-				getPolicy := getValue(common.GetA3(urlSplit[1]), "country_code", "policy_stub", allStubs)
+				getPolicy := getValue(DesensitizeString, "country_code", "policy_stub", allStubs)
 				err := json.NewEncoder(w).Encode(getPolicy)
 				if common.HandleErr(err, w, http.StatusInternalServerError) {
 					return
