@@ -33,6 +33,50 @@ func SplitURL(path string, w http.ResponseWriter, r *http.Request) []string {
 	return urlSplit
 }
 
+func allCasesNamesRequest() string {
+	return `query {
+		countries(names:[]){
+			name
+			}
+	}`
+}
+func GraphqlRequest(url string, body string) (map[string]interface{}, error) {
+	// Send request to graphql api
+	graphqlClient := graphql.NewClient(url)
+	graphqlRequest := graphql.NewRequest(body)
+
+	var graphqlResponse map[string]interface{}
+	err := graphqlClient.Run(context.Background(), graphqlRequest, &graphqlResponse)
+	return graphqlResponse, err
+}
+
+func CompareGraphCountryNames() ([]string, bool, int, int) {
+	graphqlClient := graphql.NewClient(consts.CASES_API)
+	graphqlRequest := graphql.NewRequest(allCasesNamesRequest())
+	var graphqlResponse map[string]interface{}
+	graphqlClient.Run(context.Background(), graphqlRequest, &graphqlResponse)
+	var serverCountryNames []string
+	data := graphqlResponse["countries"].([]interface{})
+	for _, server_Name := range data {
+		var shouldAppend = true
+		name := server_Name.(map[string]interface{})["name"].(string)
+		for _, localCountry := range glob.AllCountries {
+			if localCountry.Name == name {
+				shouldAppend = false
+				break
+			}
+		}
+		if shouldAppend {
+			serverCountryNames = append(serverCountryNames, server_Name.(map[string]interface{})["name"].(string))
+		}
+	}
+	if len(serverCountryNames) > 0 {
+		return serverCountryNames, false, len(serverCountryNames), len(data)
+	} else {
+		return serverCountryNames, true, len(serverCountryNames), len(data)
+	}
+}
+
 func LoadCountries() []glob.Countries {
 	//return values
 	var getAllCountries map[string]interface{}
@@ -55,22 +99,30 @@ func LoadCountries() []glob.Countries {
 }
 
 func GetCountry(inn string) (string, error) {
-	inn = strings.Replace(inn, "%20", " ", -1)
-	for _, val := range glob.AllCountries {
-		if strings.EqualFold(val.Name, inn) || strings.EqualFold(val.Code, inn) {
-			return val.Name, nil
+	if inn != "_None" {
+		inn = strings.Replace(inn, "%20", " ", -1)
+		for _, val := range glob.AllCountries {
+			if strings.EqualFold(val.Name, inn) || strings.EqualFold(val.Code, inn) {
+				return val.Name, nil
+			}
 		}
 	}
-	return inn, errors.New(consts.COUNTRY_NOT_REGISTERED)
+	return inn, errors.New(consts.COUNTRY_NOT_VALID)
 }
 
 func GetA3(inn string) (string, error) {
-	for _, val := range glob.AllCountries {
-		if strings.EqualFold(val.Name, inn) || strings.EqualFold(val.Code, inn) {
-			return val.Code, nil
+	if inn != "_None" {
+		inn = strings.Replace(inn, "%20", " ", -1)
+		for _, val := range glob.AllCountries {
+			if strings.EqualFold(val.Name, inn) || strings.EqualFold(val.Code, inn) {
+				if val.Code == "_None" {
+					return val.Code, errors.New(consts.COUNTRY_NOT_REGISTERED)
+				}
+				return val.Code, nil
+			}
 		}
 	}
-	return inn, errors.New(consts.COUNTRY_NOT_REGISTERED)
+	return inn, errors.New(consts.COUNTRY_NOT_VALID)
 }
 
 //Deprecated

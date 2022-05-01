@@ -7,6 +7,7 @@ import (
 	glob "assignment-2/globals"
 	"assignment-2/globals/common"
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -60,6 +61,20 @@ func SetPort(inn string) string {
 		log.Println(consts.PORT_SET + port)
 	}
 	return port
+}
+
+func CompareLocalA3toCases() {
+	Inconsistancies, err, amount, cases_size := common.CompareGraphCountryNames()
+	if err {
+		log.Println("No Inconsistancies found between Alpha 3 library and Cases dependancy")
+	} else {
+		log.Println("Inconsistancies found between Alpha 3 library and Cases dependancy:")
+		fmt.Println(">>\t	FOUND (", amount, "):")
+		for _, val := range Inconsistancies {
+			fmt.Println("> Country:\t[" + val + "]")
+		}
+		fmt.Println("> Incorrect amount:\t[" + fmt.Sprint(amount) + "/" + fmt.Sprint(cases_size) + "]\n> Correct amount:\t[" + fmt.Sprint(cases_size-amount) + "/" + fmt.Sprint(cases_size) + "]")
+	}
 }
 
 func LoadAllDependancies() {

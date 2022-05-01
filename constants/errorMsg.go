@@ -14,7 +14,8 @@ const STUBBING_ERR = "For stubbing use either stubbing/cases, or stubbing/policy
 const POLICY_VALUE_UNAVAILABLE = int64(-1)
 
 // Alpha3 Error messages
-const COUNTRY_NOT_REGISTERED = "invalid countryname, or countrycode"
+const COUNTRY_NOT_VALID = "invalid countryname, or countrycode"
+const COUNTRY_NOT_REGISTERED = "countryname has no assosiated countrycode"
 
 // webhook Error messages
 const INPUT_NOT_FOUND = "webhook (id): not inputted"

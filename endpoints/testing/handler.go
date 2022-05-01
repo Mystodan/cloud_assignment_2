@@ -10,6 +10,7 @@ import (
 )
 
 var Timer time.Time
+var Url string
 
 /**
  *	Handler for 'status' endpoint
@@ -17,7 +18,7 @@ var Timer time.Time
 func HandlerStub(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	// Handles the Url by splitting its value strating after the CASES_PATH
-	urlSplit := common.SplitURL(consts.STUBBING, w, r)
+	urlSplit := common.SplitURL(Url, w, r)
 	allStubs := LoadAllStubs()
 	if r.Method == http.MethodGet {
 		if urlSplit[0] == "" {
@@ -41,13 +42,13 @@ func HandlerStub(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		} else if urlSplit[0] == "policy" {
-			DesensitizeString, err := common.GetA3(urlSplit[1])
-			if common.HandleErr(err, w, http.StatusNotAcceptable) {
-				return
-			}
 			if len(urlSplit) > 1 && urlSplit[1] != "" {
+				DesensitizeString, err := common.GetA3(urlSplit[1])
+				if common.HandleErr(err, w, http.StatusNotAcceptable) {
+					return
+				}
 				getPolicy := getValue(DesensitizeString, "country_code", "policy_stub", allStubs)
-				err := json.NewEncoder(w).Encode(getPolicy)
+				err = json.NewEncoder(w).Encode(getPolicy)
 				if common.HandleErr(err, w, http.StatusInternalServerError) {
 					return
 				}

@@ -6,6 +6,7 @@ import (
 	"assignment-2/endpoints/notifications"
 	"assignment-2/endpoints/policy"
 	"assignment-2/endpoints/status"
+	stub "assignment-2/endpoints/testing"
 	"net/http"
 	"strings"
 )
@@ -29,4 +30,8 @@ func RoutePolicy() {
 func RouteStatus() {
 	routeHandler(consts.STATUS_PATH, status.HandlerStatus)
 	status.Url = consts.STATUS_PATH
+}
+func RouteStubbing() {
+	routeHandler(consts.STUBBING, stub.HandlerStub)
+	stub.Url = consts.STUBBING
 }

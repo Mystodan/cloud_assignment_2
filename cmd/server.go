@@ -3,17 +3,14 @@ package main
 import (
 	//constants
 	consts "assignment-2/constants"
-
 	glob "assignment-2/globals"
 	"math/rand"
 	"time"
 
 	// endpoints
-
 	status "assignment-2/endpoints/status"
 
 	// server
-
 	server "assignment-2/cmd/functions"
 	"context"
 	// Firebase Dependancies
@@ -40,6 +37,9 @@ func main() {
 	// Load all dependancies
 	server.LoadAllDependancies()
 
+	// Compare local Alpha 3 lib to Cases
+	server.CompareLocalA3toCases()
+
 	// Close down client
 	defer server.CloseFB(glob.Client)
 
@@ -48,6 +48,7 @@ func main() {
 	server.RoutePolicy()
 	server.RouteNotifications()
 	server.RouteStatus()
+	server.RouteStubbing()
 
 	// listen for port
 	server.SetListener(port)

@@ -35,8 +35,8 @@ func wrapData(data map[string]interface{}) Policy {
 	inn := "msg"
 	if dataExists(data, inn) && data[inn].(string) == "Data unavailable" {
 		return Policy{
-			fmt.Sprint(consts.POLICY_VALUE_UNAVAILABLE),
-			fmt.Sprint(consts.POLICY_VALUE_UNAVAILABLE),
+			country,
+			scope,
 			float64(consts.POLICY_VALUE_UNAVAILABLE),
 			consts.POLICY_VALUE_UNAVAILABLE,
 		}

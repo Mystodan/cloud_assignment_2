@@ -1,6 +1,26 @@
 {
     "countries" :[
         {
+            "code": "_None",
+            "name": "Summer Olympics 2020"
+        },
+        {
+            "code": "_None",
+            "name": "Winter Olympics 2022"
+        },
+		{
+            "code": "_None",
+            "name": "Diamond Princess"
+        },
+		{
+            "code": "_None",
+            "name": "MS Zaandam"
+        },
+		{
+            "code": "_None",
+            "name": "Kosovo"
+        },
+        {
             "code": "AFG",
             "name": "Afghanistan"
         },
@@ -162,7 +182,7 @@
         },
         {
             "code": "CPV",
-            "name": "Cape Verde"
+            "name": "Cabo Verde"
         },
         {
             "code": "CYM",
@@ -218,7 +238,7 @@
         },
         {
             "code": "CIV",
-            "name": "Côte d'Ivoire"
+            "name": "Cote d'Ivoire"
         },
         {
             "code": "HRV",
@@ -238,7 +258,7 @@
         },
         {
             "code": "CZE",
-            "name": "Czech Republic"
+            "name": "Czechia" 
         },
         {
             "code": "DNK",
@@ -470,11 +490,11 @@
         },
         {
             "code": "PRK",
-            "name": "Democratic People's Republic of Korea"
+            "name": "Korea, North"
         },
         {
             "code": "KOR",
-            "name": "South, Korea"
+            "name": "Korea, South"
         },
         {
             "code": "KWT",
@@ -486,7 +506,7 @@
         },
         {
             "code": "LAO",
-            "name": "Lao People's Democratic Republic"
+            "name": "Laos"
         },
         {
             "code": "LVA",
@@ -610,7 +630,7 @@
         },
         {
             "code": "MMR",
-            "name": "Myanmar"
+            "name": "Burma"
         },
         {
             "code": "NAM",
@@ -678,7 +698,7 @@
         },
         {
             "code": "PSE",
-            "name": "Palestine"
+            "name": "West Bank and Gaza"
         },
         {
             "code": "PAN",
@@ -854,7 +874,7 @@
         },
         {
             "code": "SWZ",
-            "name": "Swaziland"
+            "name": "Eswatini"
         },
         {
             "code": "SWE",
@@ -870,7 +890,7 @@
         },
         {
             "code": "TWN",
-            "name": "Taiwan"
+            "name": "Taiwan*"
         },
         {
             "code": "TJK",
@@ -942,7 +962,7 @@
         },
         {
             "code": "USA",
-            "name": "United States"
+            "name": "US"
         },
         {
             "code": "UMI",
@@ -966,7 +986,7 @@
         },
         {
             "code": "VNM",
-            "name": "Viet Nam"
+            "name": "Vietnam"
         },
         {
             "code": "VGB",

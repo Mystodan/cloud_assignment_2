@@ -10,7 +10,12 @@ import (
 	"time"
 )
 
+// necessary for routing
 var Url string
+
+// necessary for returning when scope returns unavailable data
+var country string
+var scope string
 
 /**
  *	Handler for 'policy' endpoint
@@ -22,7 +27,7 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		w.Header().Add("content-type", "application/json")
-		country := urlSplit[0]
+		country = urlSplit[0]
 		if len(country) < 1 {
 			http.Error(w, "No country name inputted", http.StatusBadRequest)
 			return
@@ -36,16 +41,19 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 		var optParam string
 		if _, isScope := urlQuery["scope"]; isScope {
 			optParam = urlQuery["scope"][0]
-
 			if _, err := time.Parse(consts.POLICY_DATE, optParam); common.HandleErr(err, w, http.StatusRequestedRangeNotSatisfiable) {
 				return
 			}
+			scope = optParam
 		} else {
 			optParam = time.Now().AddDate(consts.POLICY_TIME_YEAR, consts.POLICY_TIME_MONTH, consts.POLICY_TIME_DAY).Format(consts.POLICY_DATE)
+			scope = optParam
 		}
 
 		// convert to A3 code
-		country, err := common.GetA3(country)
+
+		_country, err := common.GetA3(country)
+		country = _country
 		if common.HandleErr(err, w, http.StatusNotAcceptable) {
 			return
 		}
