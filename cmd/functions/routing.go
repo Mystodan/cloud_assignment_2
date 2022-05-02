@@ -31,6 +31,8 @@ func RouteStatus() {
 	routeHandler(Apis.STATUS_PATH, status.HandlerStatus)
 	status.Url = Apis.STATUS_PATH
 }
+
+//Deprecated
 func RouteStubbing() {
 	routeHandler(Apis.STUBBING, stub.HandlerStub)
 	stub.Url = Apis.STUBBING

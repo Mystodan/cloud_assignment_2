@@ -1,5 +1,10 @@
 package glob
 
+/**
+ *	Update globals/testing/funcs.go:5 (HandleAllRules())
+ *	when adding more rules
+ */
+
 // Rule 1: Allow Application to invoke webhooks *default: true
 var AllowInvocations = true
 

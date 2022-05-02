@@ -5,19 +5,16 @@ import (
 	"assignment-2/endpoints/policy"
 	glob "assignment-2/globals"
 	"assignment-2/globals/common"
-	"encoding/json"
-	"errors"
+	testfuncs "assignment-2/globals/testing"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 )
 
 func TestHandlerPolicy(t *testing.T) {
 	// Unset Invocations and Caching
-	glob.AllowInvocations = false
-	glob.AllowCaching = false
+	testfuncs.HandleAllRules(false)
 	// Set up subtests
 	subtests := []struct {
 		name      string
@@ -26,52 +23,26 @@ func TestHandlerPolicy(t *testing.T) {
 		expected  string
 		method    string
 	}{
-		{ // The "normal" path.
-			name: "normal path",
-			http_mock: func(name string, url string) (map[string]interface{}, error) {
-				var resp map[string]interface{}
-				jsonData, _ := os.ReadFile("mocked_data.json")
-				json.Unmarshal(jsonData, &resp)
-				return resp, nil
-			},
-			path:     consts.POLICY_PATH + "Norway?scope=2022-03-13",
-			expected: `{"country_code":"NOR","scope":"2022-03-13","stringency":11.11,"policies":21}`,
-			method:   http.MethodGet,
+		{ // The "default" path.
+			name:      consts.TEST_DEFAULT_PATH,
+			http_mock: testfuncs.Mocking_Policy(consts.TEST_POLICY_DEFAULT_MOCK),
+			path:      consts.POLICY_PATH + "Norway?scope=2022-03-13",
+			expected:  `{"country_code":"NOR","scope":"2022-03-13","stringency":11.11,"policies":21}`,
+			method:    http.MethodGet,
 		},
 		{ // No data for the given date+country.
-			name: "no data available path",
-			http_mock: func(name string, url string) (map[string]interface{}, error) {
-				var resp map[string]interface{}
-				json.Unmarshal([]byte(`{
-					"policyActions": [
-						{
-							"policy_type_code": "NONE",
-							"policy_type_display": "No data.  Data may be inferred for last 7 days.",
-							"flag_value_display_field": "",
-							"policy_value_display_field": "No data.  Data may be inferred for last 7 days.",
-							"policyvalue": 0,
-							"flagged": null,
-							"notes": null
-						}
-					],
-					"stringencyData": {
-						"msg": "Data unavailable"
-					}
-				}`), &resp)
-				return resp, nil
-			},
-			path:     consts.POLICY_PATH + "NOR?scope=2022-04-31", // At the time this is written, no data exists for this entry
-			expected: `parsing time "2022-04-31": day out of range`,
-			method:   http.MethodGet,
+			name:      "no data available path",
+			http_mock: testfuncs.Mocking_Policy(consts.TEST_POLICY_NO_DATA),
+			path:      consts.POLICY_PATH + "NOR?scope=2022-04-31", // At the time this is written, no data exists for this entry
+			expected:  `parsing time "2022-04-31": day out of range`,
+			method:    http.MethodGet,
 		},
 		{ // User used wrong method
-			name: "wrong method",
-			http_mock: func(name string, url string) (map[string]interface{}, error) {
-				return map[string]interface{}{"country": nil}, errors.New("Invalid country name")
-			},
-			path:     consts.CASES_PATH + "",
-			expected: `Method not allowed, use GET`,
-			method:   http.MethodDelete,
+			name:      "wrong method",
+			http_mock: testfuncs.Mocking_Policy(""),
+			path:      consts.CASES_PATH + "",
+			expected:  `Method not allowed, use GET`,
+			method:    http.MethodDelete,
 		},
 	}
 
@@ -108,7 +79,7 @@ func TestHandlerPolicy(t *testing.T) {
 
 			// Un-mock
 			policy.GetRequest = origin
-			glob.AllowInvocations = true
+			testfuncs.HandleAllRules(true)
 		})
 	}
 }

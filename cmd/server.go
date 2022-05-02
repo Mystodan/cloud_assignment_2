@@ -48,7 +48,8 @@ func main() {
 	server.RoutePolicy()
 	server.RouteNotifications()
 	server.RouteStatus()
-	server.RouteStubbing()
+	// Default way of testing has been implemented, therefore this is deprecated
+	//server.RouteStubbing()
 
 	// listen for port
 	server.SetListener(globals.PORT)

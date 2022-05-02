@@ -5,7 +5,7 @@ import (
 	"assignment-2/endpoints/cases"
 	glob "assignment-2/globals"
 	"assignment-2/globals/common"
-	"encoding/json"
+	testfuncs "assignment-2/globals/testing"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -15,8 +15,7 @@ import (
 
 func TestHandlerCases(t *testing.T) {
 	// Unset Invocations and Caching
-	glob.AllowInvocations = false
-	glob.AllowCaching = false
+	testfuncs.HandleAllRules(false)
 	// Set up subtests
 	subtests := []struct {
 		name         string
@@ -25,28 +24,12 @@ func TestHandlerCases(t *testing.T) {
 		expected     string
 		method       string
 	}{
-		{ // The "normal" path, a successful request.
-			name: "normal path",
-			graphql_mock: func(name string, url string, body string) (map[string]interface{}, error) {
-				var resp map[string]interface{}
-				json.Unmarshal([]byte(`{
-					"country": {
-						"name": "Norway",
-						"mostRecent": {
-							"date": "2022-04-06",
-							"confirmed": 1412969,
-							"deaths": 2667,
-							"recovered": 0,
-							"growthRate": 0.001005277886011831
-						}
-					}
-				}
-`), &resp)
-				return resp, nil
-			},
-			path:     consts.CASES_PATH + "Norway",
-			expected: `{"country":"Norway","date":"2022-04-06","confirmed":1412969,"recovered":0,"deaths":2667,"growth_rate":0.001005277886011831}`,
-			method:   http.MethodGet,
+		{ // The "default" path, a successful request.
+			name:         consts.TEST_DEFAULT_PATH,
+			graphql_mock: testfuncs.Mocking_Case(consts.TEST_CASES_DEFAULT_MOCK, true),
+			path:         consts.CASES_PATH + "Norway",
+			expected:     `{"country":"Norway","date":"2022-04-06","confirmed":1412969,"recovered":0,"deaths":2667,"growth_rate":0.001005277886011831}`,
+			method:       http.MethodGet,
 		},
 		{ // User typed an invalid country name or code
 			name: "invalid country",
@@ -58,22 +41,18 @@ func TestHandlerCases(t *testing.T) {
 			method:   http.MethodGet,
 		},
 		{ // User didn't input a country name or code
-			name: "no country",
-			graphql_mock: func(name string, url string, body string) (map[string]interface{}, error) {
-				return map[string]interface{}{"country": nil}, errors.New("Invalid country name")
-			},
-			path:     consts.CASES_PATH + "",
-			expected: `No country name inputted`,
-			method:   http.MethodGet,
+			name:         "no country",
+			graphql_mock: testfuncs.Mocking_Case("No country name inputted", false),
+			path:         consts.CASES_PATH + "",
+			expected:     `No country name inputted`,
+			method:       http.MethodGet,
 		},
 		{ // User used wrong method
-			name: "wrong method",
-			graphql_mock: func(name string, url string, body string) (map[string]interface{}, error) {
-				return map[string]interface{}{"country": nil}, errors.New("Invalid country name")
-			},
-			path:     consts.CASES_PATH + "",
-			expected: `Method not allowed, use GET`,
-			method:   http.MethodDelete,
+			name:         "wrong method",
+			graphql_mock: testfuncs.Mocking_Case("No country name inputted", false),
+			path:         consts.CASES_PATH + "",
+			expected:     `Method not allowed, use GET`,
+			method:       http.MethodDelete,
 		},
 	}
 
@@ -108,7 +87,7 @@ func TestHandlerCases(t *testing.T) {
 			// Un-mock
 			cases.GetRequest = origin
 			glob.AllCountries = []glob.Countries{}
-			glob.AllowInvocations = true
+			testfuncs.HandleAllRules(true)
 
 		})
 	}
