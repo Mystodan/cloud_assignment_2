@@ -1,5 +1,8 @@
 package glob
 
+// current port
+var PORT string
+
 //invocations
 var CountryInvocations map[string]int = make(map[string]int)
 

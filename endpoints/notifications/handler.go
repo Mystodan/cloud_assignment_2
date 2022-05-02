@@ -27,7 +27,8 @@ func HandlerNotifications(w http.ResponseWriter, r *http.Request) {
 			}
 			// create a new token
 			webHook.ID = handleNewToken()
-			webHook.Country, err = common.GetCountry(webHook.Country)
+			country, err := common.GetCountry(webHook.Country)
+			webHook.Country = country.Name
 			if common.HandleErr(err, w, http.StatusInternalServerError) {
 				return
 			}

@@ -2,8 +2,8 @@ package main
 
 import (
 	//constants
-	consts "assignment-2/constants"
-	glob "assignment-2/globals"
+	constants "assignment-2/constants"
+	globals "assignment-2/globals"
 	"math/rand"
 	"time"
 
@@ -24,15 +24,15 @@ func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	status.Timer = time.Now()
 	// sets port to defalt
-	port := server.SetPort(consts.CURRENT_PORT)
+	globals.PORT = server.SetPort(constants.CURRENT_PORT)
 	// Firebase initialisation
-	glob.Ctx = context.Background()
+	globals.Ctx = context.Background()
 
 	// We use a service account, load credentials file that you downloaded from your project's settings menu.
-	app := server.SetServiceAcc(glob.Ctx, consts.SERVICEKEY_PATH)
+	app := server.SetServiceAcc(globals.Ctx, constants.SERVICEKEY_PATH)
 
 	// Instantiate client
-	glob.Client = server.InstantiateFBClient(app, glob.Ctx)
+	globals.Client = server.InstantiateFBClient(app, globals.Ctx)
 
 	// Load all dependancies
 	server.LoadAllDependancies()
@@ -41,7 +41,7 @@ func main() {
 	server.CompareLocalA3toCases()
 
 	// Close down client
-	defer server.CloseFB(glob.Client)
+	defer server.CloseFB(globals.Client)
 
 	// Routing endpoints
 	server.RouteCases()
@@ -51,5 +51,5 @@ func main() {
 	server.RouteStubbing()
 
 	// listen for port
-	server.SetListener(port)
+	server.SetListener(globals.PORT)
 }

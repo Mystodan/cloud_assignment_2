@@ -1,12 +1,12 @@
 package server
 
 import (
-	consts "assignment-2/constants"
+	Apis "assignment-2/constants"
 	"assignment-2/endpoints/cases"
 	"assignment-2/endpoints/notifications"
 	"assignment-2/endpoints/policy"
 	"assignment-2/endpoints/status"
-	stub "assignment-2/endpoints/testing"
+	stub "assignment-2/endpoints/stubbing"
 	"net/http"
 	"strings"
 )
@@ -16,22 +16,22 @@ func routeHandler(constant string, handler func(http.ResponseWriter, *http.Reque
 	http.HandleFunc(constant, handler)
 }
 func RouteNotifications() {
-	routeHandler(consts.NOTIFICATIONS_PATH, notifications.HandlerNotifications)
-	notifications.Url = consts.NOTIFICATIONS_PATH
+	routeHandler(Apis.NOTIFICATIONS_PATH, notifications.HandlerNotifications)
+	notifications.Url = Apis.NOTIFICATIONS_PATH
 }
 func RouteCases() {
-	routeHandler(consts.CASES_PATH, cases.HandlerCases)
-	cases.Url = consts.CASES_PATH
+	routeHandler(Apis.CASES_PATH, cases.HandlerCases)
+	cases.Url = Apis.CASES_PATH
 }
 func RoutePolicy() {
-	routeHandler(consts.POLICY_PATH, policy.HandlerPolicy)
-	policy.Url = consts.POLICY_PATH
+	routeHandler(Apis.POLICY_PATH, policy.HandlerPolicy)
+	policy.Url = Apis.POLICY_PATH
 }
 func RouteStatus() {
-	routeHandler(consts.STATUS_PATH, status.HandlerStatus)
-	status.Url = consts.STATUS_PATH
+	routeHandler(Apis.STATUS_PATH, status.HandlerStatus)
+	status.Url = Apis.STATUS_PATH
 }
 func RouteStubbing() {
-	routeHandler(consts.STUBBING, stub.HandlerStub)
-	stub.Url = consts.STUBBING
+	routeHandler(Apis.STUBBING, stub.HandlerStub)
+	stub.Url = Apis.STUBBING
 }

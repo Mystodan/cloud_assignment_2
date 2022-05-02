@@ -2,7 +2,7 @@ package policy
 
 import (
 	consts "assignment-2/constants"
-	"fmt"
+	"assignment-2/globals/common"
 )
 
 func dataExists(list map[string]interface{}, data string) bool {
@@ -10,7 +10,7 @@ func dataExists(list map[string]interface{}, data string) bool {
 }
 
 func formatRequest(countryCode string, date string) string {
-	return fmt.Sprintf(consts.POLICY_API+"%s/%s/", countryCode, date)
+	return common.FormatRequest(countryCode, date, consts.POLICY_API)
 }
 
 func getValidData(list map[string]interface{}, data string, data_code string) []interface{} {

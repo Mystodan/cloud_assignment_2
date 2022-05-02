@@ -2,9 +2,9 @@ package server
 
 import (
 	"assignment-2/cmd/cache"
-	consts "assignment-2/constants"
+	constants "assignment-2/constants"
 	"assignment-2/endpoints/notifications"
-	glob "assignment-2/globals"
+	globals "assignment-2/globals"
 	"assignment-2/globals/common"
 	"context"
 	"fmt"
@@ -41,24 +41,24 @@ func validPort(validity bool) string {
 	var retVal string
 	switch validity {
 	case true:
-		retVal = consts.PORT_NOTSET + consts.PORT_DEFAULT
+		retVal = constants.PORT_NOTSET + constants.PORT_DEFAULT
 	case false:
-		retVal = consts.PORT_NOTSET + consts.PORT_INVALID + consts.PORT_DEFAULT
+		retVal = constants.PORT_NOTSET + constants.PORT_INVALID + constants.PORT_DEFAULT
 	}
 	return retVal
 }
 func SetPort(inn string) string {
 	var port string
 	innValidity := checkNum(inn)
-	if strings.ToLower(inn) == "default" || inn == "8080" {
-		log.Println(consts.PORT_DEFAULT + consts.DEFAULT_PORT)
-		port = consts.DEFAULT_PORT
+	if strings.ToLower(inn) == "default" || inn == constants.DEFAULT_PORT {
+		log.Println(constants.PORT_DEFAULT + constants.DEFAULT_PORT)
+		port = constants.DEFAULT_PORT
 	} else if IsEmpty(inn) || !innValidity {
-		log.Println(validPort(innValidity) + consts.DEFAULT_PORT)
-		port = consts.DEFAULT_PORT
+		log.Println(validPort(innValidity) + constants.DEFAULT_PORT)
+		port = constants.DEFAULT_PORT
 	} else {
 		port = inn
-		log.Println(consts.PORT_SET + port)
+		log.Println(constants.PORT_SET + port)
 	}
 	return port
 }
@@ -66,25 +66,25 @@ func SetPort(inn string) string {
 func CompareLocalA3toCases() {
 	Inconsistancies, err, amount, cases_size := common.CompareGraphCountryNames()
 	if err {
-		log.Println("No Inconsistancies found between Alpha 3 library and Cases dependancy")
+		log.Println(constants.COMPARE_A3_CASES_NOT_FOUND)
 	} else {
-		log.Println("Inconsistancies found between Alpha 3 library and Cases dependancy:")
-		fmt.Println(">>\t	FOUND (", amount, "):")
+		log.Println(constants.COMPARE_A3_CASES_FOUND)
+		fmt.Printf(constants.COMPARE_A3_CASES_HEADER, amount)
 		for _, val := range Inconsistancies {
-			fmt.Println("> Country:\t[" + val + "]")
+			fmt.Printf(constants.COMPARE_A3_CASES_IDENTIFIER, val)
 		}
-		fmt.Println("> Incorrect amount:\t[" + fmt.Sprint(amount) + "/" + fmt.Sprint(cases_size) + "]\n> Correct amount:\t[" + fmt.Sprint(cases_size-amount) + "/" + fmt.Sprint(cases_size) + "]")
+		fmt.Printf(constants.COMPARE_A3_CASES_BODY, amount, cases_size, cases_size-amount, cases_size)
 	}
 }
 
 func LoadAllDependancies() {
-	glob.AllWebhooks = notifications.LoadWebhooksFromFB() // webhooks from firebase
-	glob.MemBuffer = cache.LoadCacheFromFB()              // cache from firebase
-	glob.AllCountries = common.LoadCountries()            // Alpha3 from local library
+	globals.AllWebhooks = notifications.LoadWebhooksFromFB() // webhooks from firebase
+	globals.MemBuffer = cache.LoadCacheFromFB()              // cache from firebase
+	globals.AllCountries = common.LoadCountries()            // Alpha3 from local library
 }
 
 func SetListener(inn string) {
-	log.Println("Listening on port " + inn)
+	log.Println(constants.PORT_LISTEN + inn)
 	log.Fatal(http.ListenAndServe(":"+inn, nil))
 }
 
@@ -92,7 +92,7 @@ func SetServiceAcc(ctx context.Context, serviceKey string) *firebase.App {
 	servAcc := option.WithCredentialsFile(serviceKey)
 	app, err := firebase.NewApp(ctx, nil, servAcc)
 	if err != nil {
-		log.Fatal("error initializing app:", err)
+		log.Fatal(constants.FB_INIT_ERR, err)
 	}
 	return app
 }
@@ -106,6 +106,6 @@ func InstantiateFBClient(app *firebase.App, ctx context.Context) *firestore.Clie
 func CloseFB(client *firestore.Client) {
 	err := client.Close()
 	if err != nil {
-		log.Fatal("Closing of the firebase client failed. Error:", err)
+		log.Fatal(constants.FB_CLOSE_ERR, err)
 	}
 }

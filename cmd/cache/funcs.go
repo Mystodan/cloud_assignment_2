@@ -1,3 +1,6 @@
+//go:build !mock
+// +build !mock
+
 package cache
 
 import (
@@ -19,7 +22,7 @@ import (
 func encloseParam(inn ...string) string {
 	var retVal string = ""
 	for _, param := range inn {
-		retVal += param + consts.NEXT_PARAM
+		retVal += param + consts.CACHE_NEXT_PARAM
 	}
 	return retVal
 }
@@ -37,7 +40,7 @@ func GetCache(inn ...string) (map[string]interface{}, error) {
 	if val, Get := glob.MemBuffer[encloseParams]; Get {
 		return val, nil
 	}
-	return map[string]interface{}{}, errors.New("currently no data exists within cache")
+	return map[string]interface{}{}, errors.New(consts.CACHE_NO_DATA)
 }
 
 func CheckIfCached(inn string) bool {

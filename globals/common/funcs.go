@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -32,27 +33,20 @@ func SplitURL(path string, w http.ResponseWriter, r *http.Request) []string {
 	}
 	return urlSplit
 }
-
-func allCasesNamesRequest() string {
-	return `query {
-		countries(names:[]){
-			name
-			}
-	}`
-}
-func GraphqlRequest(url string, body string) (map[string]interface{}, error) {
-	// Send request to graphql api
-	graphqlClient := graphql.NewClient(url)
-	graphqlRequest := graphql.NewRequest(body)
-
-	var graphqlResponse map[string]interface{}
-	err := graphqlClient.Run(context.Background(), graphqlRequest, &graphqlResponse)
-	return graphqlResponse, err
+func FormatRequest(countryVal string, date string, requestType string) string {
+	switch requestType {
+	case consts.CASES_API:
+		return fmt.Sprintf(consts.CASES_REQUEST, countryVal)
+	case consts.POLICY_API:
+		return fmt.Sprintf(consts.POLICY_API+"%s/%s/", countryVal, date)
+	default:
+		return ""
+	}
 }
 
 func CompareGraphCountryNames() ([]string, bool, int, int) {
 	graphqlClient := graphql.NewClient(consts.CASES_API)
-	graphqlRequest := graphql.NewRequest(allCasesNamesRequest())
+	graphqlRequest := graphql.NewRequest(consts.CASES_GET_ALL)
 	var graphqlResponse map[string]interface{}
 	graphqlClient.Run(context.Background(), graphqlRequest, &graphqlResponse)
 	var serverCountryNames []string
@@ -97,19 +91,36 @@ func LoadCountries() []glob.Countries {
 	log.Println("Done!")
 	return setAllCountries
 }
-
-func GetCountry(inn string) (string, error) {
+func fixSymbols(inn string) string {
+	inn = strings.Replace(inn, "%20", " ", -1)
+	inn = strings.Replace(inn, "%C3%85", "Å", -1)
+	inn = strings.Replace(inn, "%C3%A5", "å", -1)
+	inn = strings.Replace(inn, "%C3%86", "Æ", -1)
+	inn = strings.Replace(inn, "%C3%A6", "æ", -1)
+	inn = strings.Replace(inn, "%C3%98", "Æ", -1)
+	inn = strings.Replace(inn, "%C3%B8", "ø", -1)
+	return inn
+}
+func GetCountry(inn string) (glob.Countries, error) {
 	if inn != "_None" {
-		inn = strings.Replace(inn, "%20", " ", -1)
+		inn = fixSymbols(inn)
 		for _, val := range glob.AllCountries {
 			if strings.EqualFold(val.Name, inn) || strings.EqualFold(val.Code, inn) {
-				return val.Name, nil
+				if val.Code == "_None" && strings.EqualFold(val.Code, inn) {
+					return val, errors.New(consts.COUNTRY_NOT_REGISTERED)
+				}
+				return val, nil
 			}
 		}
 	}
-	return inn, errors.New(consts.COUNTRY_NOT_VALID)
+	fmt.Println(len(glob.AllCountries))
+	var retVal glob.Countries
+	retVal.Code = inn
+	retVal.Name = inn
+	return retVal, errors.New(consts.COUNTRY_NOT_VALID)
 }
 
+//Deprecated
 func GetA3(inn string) (string, error) {
 	if inn != "_None" {
 		inn = strings.Replace(inn, "%20", " ", -1)

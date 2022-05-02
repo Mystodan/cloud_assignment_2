@@ -2,6 +2,7 @@ package policy
 
 import (
 	consts "assignment-2/constants"
+	glob "assignment-2/globals"
 	"assignment-2/globals/common"
 
 	"assignment-2/endpoints/notifications"
@@ -12,6 +13,9 @@ import (
 
 // necessary for routing
 var Url string
+
+// necessary for mocking
+var Request = common.RequestURL
 
 // necessary for returning when scope returns unavailable data
 var country string
@@ -29,11 +33,11 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("content-type", "application/json")
 		country = urlSplit[0]
 		if len(country) < 1 {
-			http.Error(w, "No country name inputted", http.StatusBadRequest)
+			http.Error(w, consts.NO_COUNTRY_INPUT, http.StatusBadRequest)
 			return
 		}
 		if len(urlSplit) < 1 {
-			http.Error(w, "Not enough parameters, try again", http.StatusBadRequest)
+			http.Error(w, "Not enough parameters, try again", http.StatusLengthRequired)
 			return
 		}
 
@@ -51,24 +55,24 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// convert to A3 code
+		country, err := common.GetCountry(country)
 
-		_country, err := common.GetA3(country)
-		country = _country
 		if common.HandleErr(err, w, http.StatusNotAcceptable) {
 			return
 		}
 		// Send request to api
-		getRequest, err := common.RequestURL(country, formatRequest(country, optParam))
+		getRequest, err := common.RequestURL(country.Code, formatRequest(country.Code, optParam))
 		if err != nil {
-			http.Error(w, "Error sending request to covidtracker API", http.StatusFailedDependency)
+			http.Error(w, consts.POLICY_API_REQUEST_ERR, http.StatusFailedDependency)
 			return
 		}
 		// wrap response
 		formattedResponse := wrapData(getRequest)
 
 		// invoke webhooks on thread, and send to writer
-		DesensitizeString, _ := common.GetCountry(country)
-		go notifications.SetInvocation(DesensitizeString)
+		if glob.AllowInvocations {
+			go notifications.SetInvocation(country.Name)
+		}
 		// send to writer
 		err = json.NewEncoder(w).Encode(formattedResponse)
 		if common.HandleErr(err, w, http.StatusInternalServerError) {

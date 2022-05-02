@@ -1,24 +1,12 @@
 package cases
 
 import (
-	"fmt"
+	consts "assignment-2/constants"
+	"assignment-2/globals/common"
 )
 
-func formatRequest(inn string) string {
-	return fmt.Sprintf(`
-	query {
-		country(name: "%s") {
-			name
-			mostRecent {
-				date(format: "yyyy-MM-dd")
-				confirmed
-				recovered
-				deaths
-				growthRate
-			}
-		}
-	}
-	`, inn)
+func formatRequest(countryCode string) string {
+	return common.FormatRequest(countryCode, "", consts.CASES_API)
 }
 
 func wrapData(data map[string]interface{}) Case {
