@@ -53,9 +53,9 @@ func CompareGraphCountryNames() ([]string, bool, int, int) {
 	data := graphqlResponse["countries"].([]interface{})
 	for _, server_Name := range data {
 		var shouldAppend = true
-		name := server_Name.(map[string]interface{})["name"].(string)
+		server_CountryName := server_Name.(map[string]interface{})["name"].(string)
 		for _, localCountry := range glob.AllCountries {
-			if localCountry.Name == name {
+			if localCountry.Name == server_CountryName {
 				shouldAppend = false
 				break
 			}
@@ -159,7 +159,7 @@ func MethodAllowed(method string) string {
 	return consts.METHOD_NOT_ALLOWED + method
 }
 
-/**	Get issues a GET to the specified URL.
+/**	Get issues a GET to the specified URL.(for caching :))
  *	@param inn - URL
  */
 func GetURL(inn string) (*http.Response, error) {

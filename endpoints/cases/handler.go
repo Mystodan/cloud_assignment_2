@@ -4,7 +4,6 @@ import (
 	consts "assignment-2/constants"
 	"assignment-2/endpoints/notifications"
 	glob "assignment-2/globals"
-	"assignment-2/globals/common"
 	funcs "assignment-2/globals/common"
 	"encoding/json"
 	"net/http"
@@ -14,9 +13,7 @@ import (
 var Url string
 
 // necessary for mocking
-var (
-	GetRequest = common.GetGraphql
-)
+var GetRequest = funcs.GetGraphql
 
 /**
  *	Handler for 'cases' endpoint
@@ -33,14 +30,14 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// convert to A3
 		//country = funcs.DesensitizeString(country) - DEPRECATED (succeeded by GetA3 and GetCountry)
 		_country, err := funcs.GetCountry(country)
-		country = _country.Name
-		if common.HandleErr(err, w, http.StatusNotAcceptable) {
+		if funcs.HandleErr(err, w, http.StatusNotAcceptable) {
 			return
 		}
-		getGraphql, err := GetRequest(country, consts.CASES_API, formatRequest(country))
-		if funcs.HandleErr(err, w, http.StatusBadRequest) {
+		getGraphql, err := GetRequest(_country.Name, consts.CASES_API, formatRequest(_country.Name))
+		if funcs.HandleErr(err, w, http.StatusFailedDependency) {
 			return
 		}
 
@@ -49,7 +46,7 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 
 		// invoke webhooks on thread, and send to writer
 		if glob.AllowInvocations {
-			go notifications.SetInvocation(country)
+			go notifications.SetInvocation(_country.Name)
 		}
 
 		err = json.NewEncoder(w).Encode(formattedResponse)
@@ -58,7 +55,7 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else {
-		http.Error(w, common.MethodAllowed("GET"), http.StatusMethodNotAllowed)
+		http.Error(w, funcs.MethodAllowed("GET"), http.StatusMethodNotAllowed)
 		return
 	}
 

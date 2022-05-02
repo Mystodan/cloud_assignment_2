@@ -15,7 +15,7 @@ import (
 var Url string
 
 // necessary for mocking
-var Request = common.RequestURL
+var GetRequest = common.RequestURL
 
 // necessary for returning when scope returns unavailable data
 var country string
@@ -54,7 +54,7 @@ func HandlerPolicy(w http.ResponseWriter, r *http.Request) {
 			scope = optParam
 		}
 
-		// convert to A3 code
+		// convert to A3
 		country, err := common.GetCountry(country)
 
 		if common.HandleErr(err, w, http.StatusNotAcceptable) {

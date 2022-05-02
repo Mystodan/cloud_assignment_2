@@ -14,8 +14,9 @@ import (
 )
 
 func TestHandlerCases(t *testing.T) {
-	// Unset Invocations
+	// Unset Invocations and Caching
 	glob.AllowInvocations = false
+	glob.AllowCaching = false
 	// Set up subtests
 	subtests := []struct {
 		name         string
@@ -50,10 +51,10 @@ func TestHandlerCases(t *testing.T) {
 		{ // User typed an invalid country name or code
 			name: "invalid country",
 			graphql_mock: func(name string, url string, body string) (map[string]interface{}, error) {
-				return map[string]interface{}{"country": nil}, errors.New("graphql: Couldn't find data from country NO")
+				return map[string]interface{}{"country": nil}, errors.New("graphql: Couldn't find data from country Åland Islands")
 			},
-			path:     consts.CASES_PATH + "Norway",
-			expected: `graphql: Couldn't find data from country NO`,
+			path:     consts.CASES_PATH + "ALA",
+			expected: `graphql: Couldn't find data from country Åland Islands`,
 			method:   http.MethodGet,
 		},
 		{ // User didn't input a country name or code
@@ -82,20 +83,29 @@ func TestHandlerCases(t *testing.T) {
 			// Mock values
 			cases.Url = consts.CASES_PATH
 			origin := common.GetGraphql
-			glob.AllCountries = append(glob.AllCountries, glob.Countries{Name: "Norway", Code: "NOR"})
+			glob.AllCountries = append(glob.AllCountries, []glob.Countries{
+				{Name: "Norway", Code: "NOR"},
+				{Name: "Åland Islands", Code: "ALA"},
+			}...)
 			cases.GetRequest = subtest.graphql_mock
+
+			// Send request
 			req := httptest.NewRequest(subtest.method, subtest.path, nil)
+			// Setup Response
 			w := httptest.NewRecorder()
 			cases.HandlerCases(w, req)
+			// Read result and save as data
 			data, err := ioutil.ReadAll(w.Result().Body)
 			if err != nil {
 				t.Error("Error reading body of HandlerCases result", err)
 			}
 
 			strDat := string(data)[:len(string(data))-1] // Remove last character as it's a Line Break
+			// compare data to expected value
 			if strDat != subtest.expected {
 				t.Errorf("Expected '%s' but got '%v'", subtest.expected, strDat)
 			}
+			// Un-mock
 			cases.GetRequest = origin
 			glob.AllCountries = []glob.Countries{}
 			glob.AllowInvocations = true
