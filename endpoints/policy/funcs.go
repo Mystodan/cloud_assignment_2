@@ -5,20 +5,23 @@ import (
 	"assignment-2/globals/common"
 )
 
+// Checks if data exists within map [string] interface{}
 func dataExists(list map[string]interface{}, data string) bool {
 	return list[data] != nil
 }
 
+// Formats specific request for current api
 func formatRequest(countryCode string, date string) string {
 	return common.FormatRequest(countryCode, date, consts.POLICY_API)
 }
 
+// Gets valid data from api
 func getValidData(list map[string]interface{}, data string, data_code string) []interface{} {
-	alldata := list[data].([]interface{})
+	alldata := list[data].([]interface{}) // set up list with all data
 	var retVal []interface{}
-	for _, policies := range alldata {
+	for _, policies := range alldata { // iterates all data
 		validPolicies := policies.(map[string]interface{})
-		if validPolicies[data_code] != "NONE" {
+		if validPolicies[data_code] != "NONE" { // check for valid data
 			retVal = append(retVal, policies)
 		}
 	}

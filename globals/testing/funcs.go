@@ -21,6 +21,7 @@ func HandleAllRules(status bool) {
 	glob.AllowInvocations = status
 }
 
+// function which returns a mocked http response
 func Mocking_Policy(inn string, hasFile bool) func(name string, url string) (map[string]interface{}, error) {
 	return func(name string, url string) (map[string]interface{}, error) {
 		if hasFile {
@@ -34,6 +35,8 @@ func Mocking_Policy(inn string, hasFile bool) func(name string, url string) (map
 		return resp, nil
 	}
 }
+
+// function which returns a mocked graphql response
 func Mocking_Case(inn string, hasBody bool) func(name string, url string, body string) (map[string]interface{}, error) {
 	if hasBody {
 		return func(name string, url string, body string) (map[string]interface{}, error) {
@@ -47,13 +50,15 @@ func Mocking_Case(inn string, hasBody bool) func(name string, url string, body s
 	}
 }
 
+// restores token constant variables
 func resetRandomToken() {
 	notifications.TOKEN_LENGTH = consts.APP_TOKEN_LENGTH
 	notifications.TOKEN_SYMBOLS = consts.APP_TOKEN_SYMBOLS
 }
 
+// changes rules of token generator and generates a webhook id resembling the ones used in server( FireBase)
 func Mocking_Server_Webhook_ID() string {
-	defer resetRandomToken()
+	defer resetRandomToken() // restores after use
 	notifications.TOKEN_LENGTH = consts.TEST_SERVER_ID_LENGTH
 	notifications.TOKEN_SYMBOLS = consts.TEST_SERVER_ID_SYMBOLS
 	return notifications.GenerateRandomToken()

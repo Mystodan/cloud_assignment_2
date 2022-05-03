@@ -54,7 +54,7 @@ func HandlerCases(w http.ResponseWriter, r *http.Request) {
 		if funcs.HandleErr(err, w, http.StatusInternalServerError) {
 			return
 		}
-
+		// illegal method
 	} else {
 		http.Error(w, funcs.MethodAllowed("GET"), http.StatusMethodNotAllowed)
 		return

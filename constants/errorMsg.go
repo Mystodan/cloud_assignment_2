@@ -26,6 +26,6 @@ const FB_CLOSE_ERR = "Closing of the firebase client failed. Error:"
 const FB_INIT_ERR = "error initializing app:"
 
 // webhook Error messages
-const INPUT_NOT_FOUND = "webhook (id): not inputted"
+const INPUT_NOT_FOUND = "webhook (id): not found"
 const TOKEN_DELETED_FOUND = " - Webhook was deleted"
 const TOKEN_DELETED_NOT_FOUND = " - Webhook does not exist"

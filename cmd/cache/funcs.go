@@ -43,6 +43,7 @@ func GetCache(inn ...string) (map[string]interface{}, error) {
 	return map[string]interface{}{}, errors.New(consts.CACHE_NO_DATA)
 }
 
+//checks if element is cached within local buffer
 func CheckIfCached(inn string) bool {
 	for i := range glob.MemBuffer {
 		if i == inn {
@@ -52,8 +53,8 @@ func CheckIfCached(inn string) bool {
 	return false
 }
 
+// Check if the data is too old, if so, delete it
 func checkTime(doc *firestore.DocumentSnapshot) bool {
-	// Check if the data is too old, if so, delete it
 	return time.Since(doc.CreateTime).Hours() > consts.CACHE_TIMER
 }
 

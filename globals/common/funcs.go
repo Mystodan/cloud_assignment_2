@@ -17,6 +17,7 @@ import (
 	"github.com/machinebox/graphql"
 )
 
+// Function which splits url into readable slices
 func SplitURL(path string, w http.ResponseWriter, r *http.Request) []string {
 
 	// Handles when path incorrecly adds "/" to the end of url
@@ -33,44 +34,49 @@ func SplitURL(path string, w http.ResponseWriter, r *http.Request) []string {
 	}
 	return urlSplit
 }
+
+// Handler for formatting request based on api
 func FormatRequest(countryVal string, date string, requestType string) string {
 	switch requestType {
-	case consts.CASES_API:
+	case consts.CASES_API: // cases api request
 		return fmt.Sprintf(consts.CASES_REQUEST, countryVal)
-	case consts.POLICY_API:
+	case consts.POLICY_API: // policy api request
 		return fmt.Sprintf(consts.POLICY_API+"%s/%s/", countryVal, date)
 	default:
 		return ""
 	}
 }
 
+// Reads from Cases api for country names and compares with local Alpha3 library
 func CompareGraphCountryNames() ([]string, bool, int, int) {
+	// reads from cases api
 	graphqlClient := graphql.NewClient(consts.CASES_API)
 	graphqlRequest := graphql.NewRequest(consts.CASES_GET_ALL)
-	var graphqlResponse map[string]interface{}
+	var graphqlResponse map[string]interface{} // gets data from response
 	graphqlClient.Run(context.Background(), graphqlRequest, &graphqlResponse)
-	var serverCountryNames []string
-	data := graphqlResponse["countries"].([]interface{})
-	for _, server_Name := range data {
-		var shouldAppend = true
-		server_CountryName := server_Name.(map[string]interface{})["name"].(string)
-		for _, localCountry := range glob.AllCountries {
-			if localCountry.Name == server_CountryName {
-				shouldAppend = false
-				break
+	var serverCountryNames []string                      // stores all country names from api
+	data := graphqlResponse["countries"].([]interface{}) // unwraps response into readable data
+	for _, server_Name := range data {                   // iterates and reads data
+		var shouldAppend = true                                                     // handles append
+		server_CountryName := server_Name.(map[string]interface{})["name"].(string) // gets country name from api
+		for _, localCountry := range glob.AllCountries {                            // iterates local country names from alpha 3
+			if localCountry.Name == server_CountryName { // checks for consistencies
+				shouldAppend = false // appends only inconsistencies
+				break                // breaks out of loop since the data already exists in local database
 			}
 		}
-		if shouldAppend {
+		if shouldAppend { // Appends inconstency
 			serverCountryNames = append(serverCountryNames, server_Name.(map[string]interface{})["name"].(string))
 		}
 	}
-	if len(serverCountryNames) > 0 {
+	if len(serverCountryNames) > 0 { // check for name
 		return serverCountryNames, false, len(serverCountryNames), len(data)
-	} else {
+	} else { // check for no name
 		return serverCountryNames, true, len(serverCountryNames), len(data)
 	}
 }
 
+// Loads all data from local alpha 3 database/library/dependancy
 func LoadCountries() []glob.Countries {
 	//return values
 	var getAllCountries map[string]interface{}
@@ -91,6 +97,8 @@ func LoadCountries() []glob.Countries {
 	log.Println("Done!")
 	return setAllCountries
 }
+
+// Function which reads bad symbols and converts them into readable data for handler
 func fixSymbols(inn string) string {
 	inn = strings.Replace(inn, "%20", " ", -1)
 	inn = strings.Replace(inn, "%C3%85", "Å", -1)
@@ -101,22 +109,24 @@ func fixSymbols(inn string) string {
 	inn = strings.Replace(inn, "%C3%B8", "ø", -1)
 	return inn
 }
+
+// function which gets a certain country(code and name)
 func GetCountry(inn string) (glob.Countries, error) {
-	if inn != "_None" {
-		inn = fixSymbols(inn)
-		for _, val := range glob.AllCountries {
+	if inn != "_None" { // checks for non-Alpha3 variables
+		inn = fixSymbols(inn)                   // fixes bad unreadable symbols
+		for _, val := range glob.AllCountries { //iterates current buffer
 			if strings.EqualFold(val.Name, inn) || strings.EqualFold(val.Code, inn) {
 				if val.Code == "_None" && strings.EqualFold(val.Code, inn) {
-					return val, errors.New(consts.COUNTRY_NOT_REGISTERED)
+					return val, errors.New(consts.COUNTRY_NOT_REGISTERED) //not registered
 				}
-				return val, nil
+				return val, nil // If no problems return correct country
 			}
 		}
 	}
 	fmt.Println(len(glob.AllCountries))
 	var retVal glob.Countries
 	retVal.Code = inn
-	retVal.Name = inn
+	retVal.Name = inn // returns invalid country and error
 	return retVal, errors.New(consts.COUNTRY_NOT_VALID)
 }
 
@@ -155,6 +165,7 @@ func checkError(inn error) bool {
 	return true
 }
 
+// function which makes writing errors easier
 func MethodAllowed(method string) string {
 	return consts.METHOD_NOT_ALLOWED + method
 }
@@ -177,10 +188,12 @@ func HandleErr(err error, w http.ResponseWriter, code int) bool {
 	return false
 }
 
+// splits url on "/"
 func HandleURL(inn string) []string {
 	return strings.Split(inn, "/")
 }
 
+// Graphql request for cases api
 func GetGraphql(name string, url string, body string) (map[string]interface{}, error) {
 	returnVal, err := cache.GetCache(url, body)
 	if err != nil {
@@ -196,6 +209,7 @@ func GetGraphql(name string, url string, body string) (map[string]interface{}, e
 	return returnVal, err
 }
 
+// http request handling for policy api
 func RequestURL(name string, url string) (map[string]interface{}, error) {
 	returnVal, err := cache.GetCache(url)
 

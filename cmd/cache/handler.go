@@ -22,7 +22,7 @@ func LoadCacheFromFB() map[string]map[string]interface{} {
 		// reads data
 		doc := all[i]
 
-		if checkTime(doc) {
+		if checkTime(doc) { // checks if its time to delete from buffer
 			doc.Ref.Delete(glob.Ctx)
 
 			continue

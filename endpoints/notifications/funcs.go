@@ -24,6 +24,7 @@ func handleNewToken() string {
 	return token
 }
 
+// Function for checking if token already exists within local buffer
 func checkIfTokenExists(inn string) bool {
 	for i := range glob.AllWebhooks {
 		if glob.AllWebhooks[i].ID == inn {
@@ -33,6 +34,7 @@ func checkIfTokenExists(inn string) bool {
 	return false
 }
 
+// Generates a random token based on constants
 func GenerateRandomToken() string {
 	Token := make([]byte, TOKEN_LENGTH)
 	for i := range Token {
@@ -40,18 +42,25 @@ func GenerateRandomToken() string {
 	}
 	return string(Token)
 }
+
+// Deletes a webhook from firebase database
 func RemoveWebhookFromFB(webhook_id string) error {
 	_, err := glob.Client.Collection(consts.COLLECTION_WEBHOOKS).Doc(webhook_id).Delete(glob.Ctx)
 	return err
 }
+
+// Sends a webhook to firebase database
 func SendWebhookToFB(webhook glob.Webhook) (string, error) {
 	id, _, err := glob.Client.Collection(consts.COLLECTION_WEBHOOKS).Add(glob.Ctx, webhook)
 	return id.ID, err
 }
+
+// returns a document iterator to iterate through firebase database
 func iterateWebhooksFromFB() *firestore.DocumentIterator {
 	return glob.Client.Collection(consts.COLLECTION_WEBHOOKS).Documents(glob.Ctx)
 }
 
+// gets a specific webhook from local buffer
 func GetWebhook(id string, webhooks map[string]glob.Webhook) (glob.Webhook, error) {
 	for _, webhook := range webhooks {
 		if webhook.ID == id {
@@ -96,6 +105,8 @@ func LoadWebhooksFromFB() map[string]glob.Webhook {
 	}
 	return retVal
 }
+
+//Deletes webhooks from local and firebase database/buffer
 func DeleteWebhooks(id string, webhooks *map[string]glob.Webhook) (bool, error) {
 	deleted := false
 	// Delete from local webhooks, temporarily storing deleted entries
@@ -120,12 +131,13 @@ func DeleteWebhooks(id string, webhooks *map[string]glob.Webhook) (bool, error) 
 	return deleted, retVal
 }
 
+// Handles msgs on deleting webhooks
 func handleDeleted(inn bool) string {
 	var retVal string
 	switch inn {
-	case true:
+	case true: // if specific webhook is found
 		retVal = consts.TOKEN_DELETED_FOUND
-	case false:
+	case false: // if specific webhook does not exist
 		retVal = consts.TOKEN_DELETED_NOT_FOUND
 	}
 	return retVal
@@ -177,11 +189,12 @@ func InvokeWebhook(webhook glob.Webhook) (interface{}, error) {
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	return response, err
 }
+
+// sets invocation based on country name
 func SetInvocation(country string) {
 	if _, invoked := glob.CountryInvocations[country]; !invoked {
 		glob.CountryInvocations[country] = 0
 	}
-
 	glob.CountryInvocations[country]++
 	InvokeWebhooks(country, glob.CountryInvocations, glob.AllWebhooks)
 }

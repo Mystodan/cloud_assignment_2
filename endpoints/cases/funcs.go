@@ -5,10 +5,12 @@ import (
 	"assignment-2/globals/common"
 )
 
+// Formats specific request for current api
 func formatRequest(countryCode string) string {
 	return common.FormatRequest(countryCode, "", consts.CASES_API)
 }
 
+// Wraps data into structs from map[string]interface{} into a Case struct
 func wrapData(data map[string]interface{}) Case {
 	data = (data["country"].(map[string]interface{}))
 	mostRecentData := data["mostRecent"].(map[string]interface{})
