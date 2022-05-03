@@ -1,3 +1,16 @@
+# Assignment 3 - Interception :)
+#### By Daniel Hao Huynh
+
+## Peer review feedback resolved and extras
+> - Improved File Structure <br>
+> - DockerFile in main repo Added<br>
+> - Testing fully implemented to 50-90% coverage<br>
+> - Implemented comparing local alpha3 country names to cases api<br>
+> - Stubbing deprecated.<br>
+> - Threading on invocation <br>
+> - Added comprehensive commenting
+
+
 # Assignment 2
 #### By Daniel Hao Huynh
 
