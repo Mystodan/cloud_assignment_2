@@ -1,3 +1,9 @@
+# Sending requests to the service deployed to NTNU services
+It is **apparent** that you should **connect to the NTNU vpn** before trying to **access** any of the web deployed services<br> 
+- `10.212.140.185:8080/corona/v1/`<- Assignment 2 Deployment<br> 
+- `34.89.216.56:8080/corona/v1/`<- Assignment 3 Deployment<br>
+Where the service is hosted. If that was not apparant then my apologies.
+
 # Assignment 3 - Interception :)
 #### By Daniel Hao Huynh
 
@@ -10,6 +16,11 @@
 > - Threading on invocation <br>
 > - Added comprehensive commenting
 
+## Deployment
+This was deployed on google cloud platform, key was transferred using built in upload function. Documentation for Assignment 2 is still valid except stubbing endpoint, which is now deprecated.
+
+## Testing 
+run `go test .\endpoints\... -cover` from root in order to test all endpoints
 
 # Assignment 2
 #### By Daniel Hao Huynh
@@ -21,13 +32,13 @@ One small change made to the web deployed service is that the constants which co
 > This is because of how its being deployed, the application searches from the file differently and therefore requires it to be so.<br>
 However **This is not such a big change that requires it to have its own repository for deployment**
 
-> **For recreational purposes** heres an example: localhost("./global_types/alpha3.json") -> 10.212.140.185("../global_types/alpha3.json")<br>
+> **For recreational purposes** heres an example: localhost("<b>.</b>/global_types/alpha3.json") -> 10.212.140.185/ 34.89.216.56:8080("<b>..</b>/global_types/alpha3.json")<br>
 
-#### **!!!** Current state of Policy API
-> **[08.04.2022 - 06.26]** Currently when writing this, the policy api might be online, **HOWEVER** the stringency data returns data unavailable for every date<br>
+#### ~~ **!!!** Current state of Policy API~~<br>
+~~> **[08.04.2022 - 06.26]** Currently when writing this, the policy api might be online, **HOWEVER** the stringency data returns data unavailable for every date<br>
 Therefore it seems like my application returns `Data unavailable` for the policy api, However on the **stub documentation** i have documented what happens on current date<br>
-When the stub was recorded, which was on the [05.04.2022]
-
+When the stub was recorded, which was on the [05.04.2022]~~
+> **[03.05.2022 - 05.56]** Currently when writing this, the policy api IS online and working properly compared to last time :)
 ### Project Structure
 -   All constants are contained within the **constants** folder<br>
     - Contains appConstants, dependConstants, serverConstants
