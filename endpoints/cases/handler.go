@@ -9,11 +9,12 @@ import (
 	"net/http"
 )
 
-// necessary for routing
-var Url string
-
-// necessary for mocking
-var GetRequest = funcs.GetGraphql
+var (
+	// necessary for routing
+	Url string
+	// necessary for mocking
+	GetRequest = funcs.GetGraphql
+)
 
 /**
  *	Handler for 'cases' endpoint

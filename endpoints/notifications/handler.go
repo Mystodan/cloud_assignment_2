@@ -8,7 +8,15 @@ import (
 	"net/http"
 )
 
-var Url string
+var (
+	// necessary for routing
+	Url string
+	// necessary for mocking
+	Webhook_server_id string
+	Gen_Token         = GenerateRandomToken
+	TOKEN_SYMBOLS     = consts.APP_TOKEN_SYMBOLS
+	TOKEN_LENGTH      = consts.APP_TOKEN_LENGTH
+)
 
 /**
  *	Handler for 'notifications' endpoint
@@ -33,12 +41,15 @@ func HandlerNotifications(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			// sends new webhook to firestore
-			id, err := sendWebhookToFB(webHook)
-			if common.HandleErr(err, w, http.StatusInternalServerError) {
-				return
+			if glob.AllowFBWebhooks {
+				id, err := SendWebhookToFB(webHook)
+				Webhook_server_id = id
+				if common.HandleErr(err, w, http.StatusInternalServerError) {
+					return
+				}
 			}
 			// saves webhook to local storage
-			glob.AllWebhooks[id] = webHook
+			glob.AllWebhooks[Webhook_server_id] = webHook
 			// outputs
 			w.WriteHeader(http.StatusCreated)
 			err = json.NewEncoder(w).Encode(map[string]string{"webhook_id": webHook.ID})
@@ -55,7 +66,8 @@ func HandlerNotifications(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			// Delete webhook from database
-			deleted, delErr := DeleteWebhook(urlSplit[0], &glob.AllWebhooks)
+
+			deleted, delErr := DeleteWebhooks(urlSplit[0], &glob.AllWebhooks)
 			if common.HandleErr(delErr, w, http.StatusInternalServerError) {
 				return
 			} // Handles status messages on deleted or not

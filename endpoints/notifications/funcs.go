@@ -11,14 +11,15 @@ import (
 	"math/rand"
 	"net/http"
 
+	"cloud.google.com/go/firestore"
 	"google.golang.org/api/iterator"
 )
 
 // Functions for webhook tokens
 func handleNewToken() string {
-	token := GenerateRandomToken()
+	token := Gen_Token()
 	for checkIfTokenExists(token) {
-		token = GenerateRandomToken()
+		token = Gen_Token()
 	}
 	return token
 }
@@ -33,16 +34,22 @@ func checkIfTokenExists(inn string) bool {
 }
 
 func GenerateRandomToken() string {
-	Token := make([]byte, consts.APP_TOKEN_LENGTH)
+	Token := make([]byte, TOKEN_LENGTH)
 	for i := range Token {
-		Token[i] = consts.APP_TOKEN_SYMBOLS[rand.Intn(len(consts.APP_TOKEN_SYMBOLS))]
+		Token[i] = TOKEN_SYMBOLS[rand.Intn(len(TOKEN_SYMBOLS))]
 	}
 	return string(Token)
 }
-
-func sendWebhookToFB(webhook glob.Webhook) (string, error) {
+func RemoveWebhookFromFB(webhook_id string) error {
+	_, err := glob.Client.Collection(consts.COLLECTION_WEBHOOKS).Doc(webhook_id).Delete(glob.Ctx)
+	return err
+}
+func SendWebhookToFB(webhook glob.Webhook) (string, error) {
 	id, _, err := glob.Client.Collection(consts.COLLECTION_WEBHOOKS).Add(glob.Ctx, webhook)
 	return id.ID, err
+}
+func iterateWebhooksFromFB() *firestore.DocumentIterator {
+	return glob.Client.Collection(consts.COLLECTION_WEBHOOKS).Documents(glob.Ctx)
 }
 
 func GetWebhook(id string, webhooks map[string]glob.Webhook) (glob.Webhook, error) {
@@ -63,16 +70,15 @@ func LoadWebhooksFromFB() map[string]glob.Webhook {
 	retVal := make(map[string]glob.Webhook) // Prepare return list
 
 	// Iterate through firestore database...
-	loopThroughFireBase := glob.Client.Collection(consts.COLLECTION_WEBHOOKS).Documents(glob.Ctx)
-
+	IterateWebhooks := iterateWebhooksFromFB()
 	log.Println("Loading webhooks...")
 
 	for {
 		// reads data
-		doc, err := loopThroughFireBase.Next()
+		doc, err := IterateWebhooks.Next()
 		if err == iterator.Done {
 			log.Println("Done!")
-			loopThroughFireBase.Stop()
+			IterateWebhooks.Stop()
 			break
 		}
 		if err != nil {
@@ -90,7 +96,7 @@ func LoadWebhooksFromFB() map[string]glob.Webhook {
 	}
 	return retVal
 }
-func DeleteWebhook(id string, webhooks *map[string]glob.Webhook) (bool, error) {
+func DeleteWebhooks(id string, webhooks *map[string]glob.Webhook) (bool, error) {
 	deleted := false
 	// Delete from local webhooks, temporarily storing deleted entries
 	deletedWebhooks := []string{}
@@ -103,10 +109,12 @@ func DeleteWebhook(id string, webhooks *map[string]glob.Webhook) (bool, error) {
 	}
 	// Loop through temporarily stored webhooks, matching, thereafter deleting them from FireStore database
 	var retVal error = nil
-	for _, webhook_string := range deletedWebhooks {
-		_, delErr := glob.Client.Collection(consts.COLLECTION_WEBHOOKS).Doc(webhook_string).Delete(glob.Ctx)
-		if delErr != nil {
-			retVal = delErr
+	if glob.AllowFBWebhooks {
+		for _, webhook_id := range deletedWebhooks {
+			delErr := RemoveWebhookFromFB(webhook_id)
+			if delErr != nil {
+				retVal = delErr
+			}
 		}
 	}
 	return deleted, retVal

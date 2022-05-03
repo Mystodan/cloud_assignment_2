@@ -26,7 +26,6 @@ func getValidData(list map[string]interface{}, data string, data_code string) []
 }
 
 func wrapData(data map[string]interface{}) Policy {
-
 	// Get all valid policies
 	policies := getValidData(data, "policyActions", "policy_type_code")
 	// Get 'stringencyData'

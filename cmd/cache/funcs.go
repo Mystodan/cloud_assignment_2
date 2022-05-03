@@ -63,7 +63,7 @@ func checkTime(doc *firestore.DocumentSnapshot) bool {
 func AddToCache(name string, inn map[string]interface{}, params ...string) error {
 	var err error = nil
 	if !CheckIfCached(name) {
-		if glob.AllowCaching {
+		if glob.AllowFBCaching {
 			glob.MemBuffer[name] = inn
 			_, _, err = glob.Client.Collection(consts.COLLECTION_CACHE).Add(glob.Ctx, map[string]map[string]interface{}{name: inn})
 		}

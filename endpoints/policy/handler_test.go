@@ -25,21 +25,21 @@ func TestHandlerPolicy(t *testing.T) {
 	}{
 		{ // The "default" path.
 			name:      consts.TEST_DEFAULT_PATH,
-			http_mock: testfuncs.Mocking_Policy(consts.TEST_POLICY_DEFAULT_MOCK),
+			http_mock: testfuncs.Mocking_Policy(consts.TEST_DEFAULT_MOCK_JSON, true),
 			path:      consts.POLICY_PATH + "Norway?scope=2022-03-13",
 			expected:  `{"country_code":"NOR","scope":"2022-03-13","stringency":11.11,"policies":21}`,
 			method:    http.MethodGet,
 		},
 		{ // No data for the given date+country.
 			name:      "no data available path",
-			http_mock: testfuncs.Mocking_Policy(consts.TEST_POLICY_NO_DATA),
+			http_mock: testfuncs.Mocking_Policy(consts.TEST_POLICY_NO_DATA, false),
 			path:      consts.POLICY_PATH + "NOR?scope=2022-04-31", // At the time this is written, no data exists for this entry
 			expected:  `parsing time "2022-04-31": day out of range`,
 			method:    http.MethodGet,
 		},
 		{ // User used wrong method
 			name:      "wrong method",
-			http_mock: testfuncs.Mocking_Policy(""),
+			http_mock: testfuncs.Mocking_Policy("", false),
 			path:      consts.CASES_PATH + "",
 			expected:  `Method not allowed, use GET`,
 			method:    http.MethodDelete,

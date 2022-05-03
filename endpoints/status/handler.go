@@ -7,8 +7,12 @@ import (
 	"time"
 )
 
-var Timer time.Time
-var Url string
+var (
+	// Necessary for saving the uptime of application
+	Timer time.Time
+	// necessary for routing
+	Url string
+)
 
 /**
  *	Handler for 'status' endpoint

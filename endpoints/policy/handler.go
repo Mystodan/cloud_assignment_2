@@ -11,15 +11,15 @@ import (
 	"time"
 )
 
-// necessary for routing
-var Url string
-
-// necessary for mocking
-var GetRequest = common.RequestURL
-
-// necessary for returning when scope returns unavailable data
-var country string
-var scope string
+var (
+	// necessary for routing
+	Url string
+	// necessary for mocking
+	GetRequest = common.RequestURL
+	// necessary for returning when scope returns unavailable data
+	country string
+	scope   string
+)
 
 /**
  *	Handler for 'policy' endpoint
