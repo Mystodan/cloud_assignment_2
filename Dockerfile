@@ -2,7 +2,7 @@ FROM golang:1.17
 
 LABEL  maintainer="daniehhu@stud.ntnu.no"
 
-WORKDIR /go/src/app/
+WORKDIR /go/src/app/cmd
 
 COPY ./cmd /go/src/app/cmd
 COPY ./constants /go/src/app/constants
