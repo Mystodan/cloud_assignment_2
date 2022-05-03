@@ -15,4 +15,4 @@ COPY ./go.sum /go/src/app/go.sum
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o server
 
-CMD ["./cmd"]
+CMD ["./server"]
