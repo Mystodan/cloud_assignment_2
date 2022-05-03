@@ -6,7 +6,7 @@
 > - DockerFile in main repo Added<br>
 > - Testing fully implemented to 50-90% coverage<br>
 > - Implemented comparing local alpha3 country names to cases api<br>
-> - Stubbing deprecated.<br>
+> - Stubbing Endpoint deprecated.<br>
 > - Threading on invocation <br>
 > - Added comprehensive commenting
 
